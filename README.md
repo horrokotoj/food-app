@@ -12,9 +12,9 @@ Requires npm version 8.5.5
 
 `npm i -g expo-cli `
 
-`expo install expo-secure-store react-native-gesture-handler`
+`expo install expo-secure-store`
 
-`npm install --save react-native-paper react-native-vector-icons`
+`npm i --save react-native-paper react-native-vector-icons @react-navigation/native @react-navigation/stack`
 
 ## To run
 
