@@ -1,5 +1,5 @@
 export default async function LoginRequest(username, password) {
-  let endpoint = DOMAIN_AUTH + '/login/';
+  let endpoint = 'http://localhost:4000/login/';
   console.log('Entered LoginRequest');
   let body = JSON.stringify({
     username: username,
@@ -15,13 +15,18 @@ export default async function LoginRequest(username, password) {
       },
       body: body,
     });
-    if (response.status == 200) {
+    if (response.status === 200) {
       console.log('Status 200');
       let json = await response.json();
       console.log(json);
       return json;
+    } else if (response.status == 401) {
+      console.log('Status 401');
+      alert('Username and password does not match a valid user');
+      return null;
     } else {
       console.log(response.status);
+      console.log('here');
       return null;
     }
   } catch (e) {

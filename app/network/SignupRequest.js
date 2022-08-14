@@ -1,6 +1,6 @@
 export default async function LoginRequest(username, password) {
-  let endpoint = DOMAIN_AUTH + '/user/';
-  console.log('Entered LoginRequest');
+  let endpoint = 'http://localhost:4000/user/';
+  console.log('Entered SignupRequest');
   let body = JSON.stringify({
     username: username,
     password: password,

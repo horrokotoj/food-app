@@ -1,22 +1,15 @@
+import 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { View, SafeAreaView } from 'react-native';
 
 import Navigator from './app/navigators/Navigator';
+import { styleSheet } from './app/styleSheets/StyleSheet';
 
 export default function App() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styleSheet.appContainer}>
       <Navigator />
       <StatusBar style='auto' />
-    </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
