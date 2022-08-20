@@ -18,6 +18,7 @@ import LoginRequest from '../network/LoginRequest';
 import SignupRequest from '../network/SignupRequest';
 import SignoutRequest from '../network/SignoutRequest';
 import RefreshToken from '../network/RefreshToken';
+import GetRecipes from '../network/GetRecipes';
 
 export default function Navigator() {
   const [loading, setLoading] = useState(false);
@@ -51,6 +52,19 @@ export default function Navigator() {
       isSignout: true,
     }
   );
+
+  const refreshAccessToken = async () => {
+    let refreshToken = await SecureStore.getItemAsync('refreshToken');
+    if (refreshToken) {
+      let response = await RefreshToken(refreshToken);
+      console.log(response);
+      if (response.token) {
+        setAccessToken(response.token);
+        return response.token;
+      }
+    }
+    return null;
+  };
 
   useEffect(() => {
     // Fetch the token from storage then navigate to our appropriate place
@@ -185,6 +199,29 @@ export default function Navigator() {
           if (response) {
             setAccessToken(response.token);
           }
+        }
+      },
+      getRecipes: async (accessToken) => {
+        let response;
+        try {
+          response = await GetRecipes(accessToken);
+          if (response === 403) {
+            let maybeAccessToken = await refreshAccessToken();
+            if (maybeAccessToken) {
+              let newResponse = await GetRecipes(maybeAccessToken);
+              if (newResponse === 500) {
+                alert('Unable to refresh access token');
+              } else if (response) {
+                return response;
+              }
+            }
+          }
+          if (response) {
+            return response;
+          }
+          return null;
+        } catch (err) {
+          console.log(err);
         }
       },
     }),

@@ -15,7 +15,14 @@ export default function DrawerContent(props) {
           <Drawer.Section>
             <DrawerItem
               label={'Home'}
-              onPress={() => props.navigation.navigate(tr('Drawer.Home'))}
+              onPress={() => props.navigation.navigate('Home')}
+              icon={({ color, size }) => (
+                <Ionicons name='home' color={color} size={size} />
+              )}
+            />
+            <DrawerItem
+              label={'Recipes'}
+              onPress={() => props.navigation.navigate('Recipes')}
               icon={({ color, size }) => (
                 <Ionicons name='document-text' color={color} size={size} />
               )}
