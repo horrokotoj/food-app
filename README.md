@@ -19,3 +19,7 @@ Requires npm version 8.5.5
 ## To run
 
 `npm start`
+
+If problem with cache use:
+
+`expo r -c`
