@@ -70,18 +70,25 @@ export default function Navigator() {
 		// Fetch the token from storage then navigate to our appropriate place
 		const bootstrapAsync = async () => {
 			setLoading(true);
-			let storedRefreshToken = null;
-			let storedUsername = null;
+			let refreshToken = null;
+			let username = null;
 
 			try {
-				storedRefreshToken = await SecureStore.getItemAsync('refreshToken');
-				storedUsername = await SecureStore.getItemAsync('username');
-				console.log(storedRefreshToken);
-				console.log(storedUsername);
+				refreshToken = await SecureStore.getItemAsync('refreshToken');
+				username = await SecureStore.getItemAsync('username');
+				console.log(refreshToken);
+				console.log(username);
 				console.log('Result in bootstrap');
-				if (storedRefreshToken && storedUsername) {
-					setUsername(storedUsername);
-					dispatch({ type: 'RESTORE_TOKEN', isSignout: false });
+				if (refreshToken && username) {
+					setUsername(username);
+					let response = await RefreshToken(refreshToken);
+					if (response.token) {
+						setAccessToken(response.token);
+						dispatch({ type: 'RESTORE_TOKEN', isSignout: false });
+					} else {
+						alert('Failed to refresh accessToken');
+						dispatch({ type: 'SIGN_OUT' });
+					}
 				}
 			} catch (e) {
 				// Restoring token failed
