@@ -16,6 +16,16 @@ Requires npm version 8.5.5
 
 `npm i --save react-native-paper react-native-vector-icons @react-navigation/native @react-navigation/stack @react-navigation/drawer`
 
+.env file
+
+`DOMAIN_SERVER="your-domain"`
+
+`DOMAIN_AUTH="your-domain"`
+
+`PORT_SERVER="your-port"`
+
+`PORT_AUTH="your-port"`
+
 ## To run
 
 `npm start`
