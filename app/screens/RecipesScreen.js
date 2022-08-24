@@ -1,4 +1,4 @@
-import { useState, useContext, useCallback } from 'react';
+import { useState, useContext, useCallback, useEffect } from 'react';
 import {
   View,
   ScrollView,
@@ -35,8 +35,14 @@ const RecipesScreen = (props) => {
     setRefreshing(false);
   }, []);
 
+  useEffect(() => {
+    const getRecipesOnRender = async () => {
+      await handleGetRecipes();
+    };
+    getRecipesOnRender();
+  }, []);
+
   console.log('Recipes in RecipesScreen');
-  console.log(recipes);
 
   return (
     <View style={styleSheet.container}>

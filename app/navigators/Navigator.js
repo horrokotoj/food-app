@@ -19,6 +19,9 @@ import SignupRequest from '../network/SignupRequest';
 import SignoutRequest from '../network/SignoutRequest';
 import RefreshToken from '../network/RefreshToken';
 import GetRecipes from '../network/GetRecipes';
+import GetIngredients from '../network/GetIngredients';
+import GetRecipeIngredients from '../network/GetRecipeIngredients';
+import GetRecipeSteps from '../network/GetRecipeSteps';
 
 export default function Navigator() {
   const [loading, setLoading] = useState(false);
@@ -215,6 +218,90 @@ export default function Navigator() {
             let maybeAccessToken = await refreshAccessToken();
             if (maybeAccessToken) {
               let newResponse = await GetRecipes(maybeAccessToken);
+              if (newResponse === 500) {
+                alert('Unable to refresh access token');
+              } else if (newResponse) {
+                return newResponse;
+              }
+            }
+          }
+          if (response === 500) {
+            return null;
+          }
+          if (response) {
+            return response;
+          }
+          return null;
+        } catch (err) {
+          console.log(err);
+        }
+      },
+      getIngredients: async (accessToken) => {
+        let response;
+        try {
+          response = await GetIngredients(accessToken);
+          if (response === 403) {
+            let maybeAccessToken = await refreshAccessToken();
+            if (maybeAccessToken) {
+              let newResponse = await GetIngredients(maybeAccessToken);
+              if (newResponse === 500) {
+                alert('Unable to refresh access token');
+              } else if (newResponse) {
+                return newResponse;
+              }
+            }
+          }
+          if (response === 500) {
+            return null;
+          }
+          if (response) {
+            return response;
+          }
+          return null;
+        } catch (err) {
+          console.log(err);
+        }
+      },
+      getRecipeIngredients: async (accessToken, recipeId) => {
+        let response;
+        try {
+          response = await GetRecipeIngredients(accessToken, recipeId);
+          if (response === 403) {
+            let maybeAccessToken = await refreshAccessToken();
+            if (maybeAccessToken) {
+              let newResponse = await GetRecipeIngredients(
+                maybeAccessToken,
+                recipeId
+              );
+              if (newResponse === 500) {
+                alert('Unable to refresh access token');
+              } else if (newResponse) {
+                return newResponse;
+              }
+            }
+          }
+          if (response === 500) {
+            return null;
+          }
+          if (response) {
+            return response;
+          }
+          return null;
+        } catch (err) {
+          console.log(err);
+        }
+      },
+      getRecipeSteps: async (accessToken, recipeId) => {
+        let response;
+        try {
+          response = await GetRecipeSteps(accessToken, recipeId);
+          if (response === 403) {
+            let maybeAccessToken = await refreshAccessToken();
+            if (maybeAccessToken) {
+              let newResponse = await GetRecipeSteps(
+                maybeAccessToken,
+                recipeId
+              );
               if (newResponse === 500) {
                 alert('Unable to refresh access token');
               } else if (newResponse) {
