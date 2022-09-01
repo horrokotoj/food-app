@@ -39,6 +39,7 @@ const LoginScreen = ({ navigation }) => {
         >
           <TextInput
             style={styleSheet.input}
+            mode='outlined'
             label='Username'
             autoCapitalize='none'
             value={username}
@@ -51,6 +52,7 @@ const LoginScreen = ({ navigation }) => {
           {secureEntry ? (
             <TextInput
               style={styleSheet.input}
+              mode='outlined'
               secureTextEntry
               label='Password'
               value={password}
@@ -71,6 +73,7 @@ const LoginScreen = ({ navigation }) => {
           ) : (
             <TextInput
               style={styleSheet.input}
+              mode='outlined'
               autoCapitalize='none'
               label='Password'
               value={password}

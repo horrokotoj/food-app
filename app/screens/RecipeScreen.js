@@ -1,38 +1,35 @@
 import { useState, useContext, useEffect } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import {
   Appbar,
   Menu,
-  Button,
-  Divider,
   Provider,
   Card,
-  Avatar,
   Title,
   Paragraph,
-  List,
+  TextInput,
+  Button,
 } from 'react-native-paper';
-import { set } from 'react-native-reanimated';
 import { styleSheet } from '../styleSheets/StyleSheet';
 
 import { NetworkContext } from '../context/NetworkContext';
 import { AccessTokenContext } from '../context/AccessTokenContext';
+import { UsernameContext } from '../context/UsernameContext';
 
-import RecipeIngredient from '../components/RecipeIngredient';
+import RecipeDesc from '../components/RecipeDesc';
+import RecipeIngredients from '../components/RecipeIngredients';
 import RecipeStep from '../components/RecipeStep';
 
 const RecipeScreen = ({ route, navigation }) => {
-  const [menuVisible, setMenuVisible] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [recipeIngredients, setRecipeIngredients] = useState(null);
   const [recipeSteps, setRecipeSteps] = useState(null);
+
   const { recipe } = route.params;
 
   const accessToken = useContext(AccessTokenContext);
+  const username = useContext(UsernameContext);
   const { getRecipeIngredients, getRecipeSteps } = useContext(NetworkContext);
-
-  const openMenu = () => setMenuVisible(true);
-
-  const closeMenu = () => setMenuVisible(false);
 
   const MORE_ICON = Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical';
 
@@ -42,6 +39,8 @@ const RecipeScreen = ({ route, navigation }) => {
       response = await getRecipeIngredients(accessToken, recipe.RecipeId);
       if (response.length > 0) {
         setRecipeIngredients(response);
+      } else {
+        setRecipeIngredients(null);
       }
     } catch (err) {
       console.log(err);
@@ -56,6 +55,8 @@ const RecipeScreen = ({ route, navigation }) => {
         console.log('Response in handleGetRecipeSteps');
         console.log(response);
         setRecipeSteps(response);
+      } else {
+        setRecipeSteps(null);
       }
     } catch (err) {
       console.log(err);
@@ -76,51 +77,74 @@ const RecipeScreen = ({ route, navigation }) => {
   }, [recipe]);
 
   console.log(recipe);
+
   return (
     <Provider>
       <Appbar.Header>
         <Appbar.BackAction
           onPress={() => {
+            setIsEditing(false);
             navigation.navigate('Recipes');
           }}
         />
         <Appbar.Content title={recipe.RecipeName} />
 
-        <Menu
-          visible={menuVisible}
-          onDismiss={closeMenu}
-          anchor={
-            <Appbar.Action
-              icon={MORE_ICON}
-              color='white'
-              onPress={() => {
-                setMenuVisible(!menuVisible);
-              }}
-            />
-          }
-        >
-          <Menu.Item onPress={() => {}} title='Edit' />
-          <Menu.Item onPress={() => {}} title='Delete' />
-        </Menu>
+        {username === recipe.RecipeOwner && (
+          <Appbar.Action
+            icon={isEditing ? 'check-outline' : MORE_ICON}
+            color='white'
+            onPress={() => {
+              setIsEditing(!isEditing);
+            }}
+          />
+        )}
       </Appbar.Header>
 
       <ScrollView>
         <Card>
           <Card.Cover source={{ uri: recipe.RecipeImage }} />
           <Card.Content>
-            <Title>Description</Title>
-            <Paragraph>{recipe.RecipeDesc}</Paragraph>
-            {recipeSteps && <Title>Steps</Title>}
+            <RecipeDesc
+              recipeDesc={recipe.RecipeDesc}
+              isEditing={isEditing}
+              recipeId={recipe.RecipeId}
+            />
+            <RecipeIngredients
+              recipeIngredients={recipeIngredients}
+              isEditing={isEditing}
+              recipeId={recipe.RecipeId}
+            />
 
-            {recipeSteps ? (
+            {(recipeSteps || isEditing) && (
+              <Title style={styleSheet.recipeTitle}>Steps:</Title>
+            )}
+
+            {recipeSteps &&
+              !isEditing &&
               recipeSteps.map((recipeStep) => {
                 return <RecipeStep key={recipeStep.Step} step={recipeStep} />;
-              })
-            ) : (
-              <></>
+              })}
+
+            {isEditing && (
+              <Button
+                icon='plus-circle-outline'
+                labelStyle={styleSheet.addButtonLabelStyle}
+                style={styleSheet.addButton}
+                onPress={() => {}}
+              />
             )}
-            {recipeIngredients && <Title>Ingredients</Title>}
-            {recipeIngredients ? (
+            {(recipe.RecipePortions || isEditing) && (
+              <Title style={styleSheet.recipeTitle}>Portions:</Title>
+            )}
+            {recipe.RecipePortions && !isEditing && (
+              <Paragraph>{recipe.RecipePortions}</Paragraph>
+            )}
+
+            {(recipeIngredients || isEditing) && (
+              <Title style={styleSheet.recipeTitle}>Ingredients:</Title>
+            )}
+            {/*recipeIngredients &&
+              !isEditing &&
               recipeIngredients.map((recipeIngredient) => {
                 return (
                   <RecipeIngredient
@@ -128,9 +152,15 @@ const RecipeScreen = ({ route, navigation }) => {
                     ingredient={recipeIngredient}
                   />
                 );
-              })
-            ) : (
-              <></>
+              })*/}
+
+            {isEditing && (
+              <Button
+                icon='plus-circle-outline'
+                labelStyle={styleSheet.addButtonLabelStyle}
+                style={styleSheet.addButton}
+                onPress={() => {}}
+              />
             )}
           </Card.Content>
         </Card>

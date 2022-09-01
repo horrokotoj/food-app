@@ -22,13 +22,16 @@ export default async function LoginRequest(username, password) {
       let json = await response.json();
       console.log(json);
       return json;
-    } else if (response.status == 401) {
+    } else if (response.status === 401) {
       console.log('Status 401');
       alert('Username and password does not match a valid user');
       return null;
+    } else if (response.status === 400) {
+      console.log('Status 400');
+      alert('Request is missing a username and/or password');
+      return null;
     } else {
       console.log(response.status);
-      console.log('here');
       return null;
     }
   } catch (e) {

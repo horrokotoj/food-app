@@ -22,6 +22,9 @@ import GetRecipes from '../network/GetRecipes';
 import GetIngredients from '../network/GetIngredients';
 import GetRecipeIngredients from '../network/GetRecipeIngredients';
 import GetRecipeSteps from '../network/GetRecipeSteps';
+import PatchRecipe from '../network/PatchRecipe';
+import DeleteRecipe from '../network/DeleteRecipe';
+import PatchRecipeIngredient from '../network/PatchRecipeIngredient';
 
 export default function Navigator() {
   const [loading, setLoading] = useState(false);
@@ -316,6 +319,87 @@ export default function Navigator() {
             return response;
           }
           return null;
+        } catch (err) {
+          console.log(err);
+        }
+      },
+      patchRecipe: async (accessToken, bodyObj) => {
+        let response;
+        try {
+          response = await PatchRecipe(accessToken, bodyObj);
+          if (response === 403) {
+            let maybeAccessToken = await refreshAccessToken();
+            if (maybeAccessToken) {
+              let newResponse = await PatchRecipe(maybeAccessToken, bodyObj);
+              if (newResponse === 500) {
+                alert('Unable to refresh access token');
+              } else if (newResponse) {
+                return newResponse;
+              }
+            }
+          }
+          if (response === 500) {
+            return false;
+          }
+          if (response) {
+            return response;
+          }
+          return false;
+        } catch (err) {
+          console.log(err);
+        }
+      },
+      deleteRecipe: async (accessToken, bodyObj) => {
+        let response;
+        try {
+          response = await DeleteRecipe(accessToken, bodyObj);
+          if (response === 403) {
+            let maybeAccessToken = await refreshAccessToken();
+            if (maybeAccessToken) {
+              let newResponse = await DeleteRecipe(maybeAccessToken, bodyObj);
+              if (newResponse === 500) {
+                alert('Unable to refresh access token');
+              } else if (newResponse) {
+                return newResponse;
+              }
+            }
+          }
+          if (response === 500) {
+            return false;
+          }
+          if (response) {
+            return response;
+          }
+          return false;
+        } catch (err) {
+          console.log(err);
+        }
+      },
+      patchRecipeIngredient: async (accessToken, bodyObj) => {
+        let response;
+        try {
+          response = await PatchRecipeIngredient(accessToken, bodyObj);
+          if (response === 403) {
+            let maybeAccessToken = await refreshAccessToken();
+            if (maybeAccessToken) {
+              let newResponse = await PatchRecipeIngredient(
+                maybeAccessToken,
+                bodyObj
+              );
+              if (newResponse === 500) {
+                alert('Unable to refresh access token');
+              } else if (newResponse) {
+                return newResponse;
+              }
+            }
+          }
+          if (response === 500) {
+            return false;
+          }
+          if (response) {
+            return response;
+          }
+          return false;
         } catch (err) {
           console.log(err);
         }

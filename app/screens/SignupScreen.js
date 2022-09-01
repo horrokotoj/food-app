@@ -51,6 +51,7 @@ const SignupScreen = ({ navigation }) => {
         >
           <TextInput
             style={styleSheet.input}
+            mode='outlined'
             label='Username'
             autoCapitalize='none'
             value={username}
@@ -63,6 +64,7 @@ const SignupScreen = ({ navigation }) => {
           {secureEntry ? (
             <TextInput
               style={styleSheet.input}
+              mode='outlined'
               secureTextEntry
               label='Password'
               value={password}
@@ -83,6 +85,7 @@ const SignupScreen = ({ navigation }) => {
           ) : (
             <TextInput
               style={styleSheet.input}
+              mode='outlined'
               autoCapitalize='none'
               label='Password'
               value={password}
@@ -104,6 +107,7 @@ const SignupScreen = ({ navigation }) => {
           {secureEntry ? (
             <TextInput
               style={styleSheet.input}
+              mode='outlined'
               secureTextEntry
               label='Reenter password'
               value={passwordConfirm}
@@ -124,6 +128,7 @@ const SignupScreen = ({ navigation }) => {
           ) : (
             <TextInput
               style={styleSheet.input}
+              mode='outlined'
               autoCapitalize='none'
               label='Reenter password'
               value={passwordConfirm}

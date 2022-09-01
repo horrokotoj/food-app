@@ -1,13 +1,14 @@
 import { DOMAIN_SERVER, PORT_SERVER } from '@env';
 
-export default async function GetRecipeIngredients(token, ingredientId) {
+export default async function GetRecipeIngredients(token, recipeId) {
   let endpoint =
     'http://' +
     DOMAIN_SERVER +
     ':' +
     PORT_SERVER +
     '/recipeingredient/' +
-    ingredientId;
+    recipeId;
+
   console.log('Entered GetRecipeIngredients');
 
   try {

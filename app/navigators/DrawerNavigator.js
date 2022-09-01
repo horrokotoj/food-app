@@ -13,6 +13,7 @@ export default function DrawerNavigator() {
     <Drawer.Navigator
       useLegacyImplementation={true}
       drawerContent={(props) => <DrawerContent {...props} />}
+      screenOptions={{ unmountOnBlur: true }}
     >
       <Drawer.Screen name={'Home'} component={HomeScreen} />
       <Drawer.Screen name={'Recipes'} component={RecipesScreen} />
