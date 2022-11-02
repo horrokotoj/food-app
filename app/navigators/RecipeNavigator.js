@@ -6,12 +6,12 @@ import RecipeScreen from '../screens/RecipeScreen';
 const RecipeStack = createStackNavigator();
 
 const RecipeNavigator = () => {
-  return (
-    <RecipeStack.Navigator>
-      <RecipeStack.Screen name='Recipes' component={RecipesScreen} />
-      <RecipeStack.Screen name='Recipe' component={RecipeScreen} />
-    </RecipeStack.Navigator>
-  );
+	return (
+		<RecipeStack.Navigator>
+			<RecipeStack.Screen name='Recipes' component={RecipesScreen} />
+			<RecipeStack.Screen name='Recipe' component={RecipeScreen} />
+		</RecipeStack.Navigator>
+	);
 };
 
 export default RecipeNavigator;
