@@ -21,6 +21,8 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 	const [ingToAdd, setIngToAdd] = useState('');
 	const [quantToAdd, setQuantToAdd] = useState('');
 	const [allIngredients, setAllIngredients] = useState(null);
+	const [newIngredients, setNewIngredients] = useState(null);
+	const [searchData, setSearchData] = useState(null);
 
 	const accessToken = useContext(AccessTokenContext);
 	const { patchRecipeIngredient, getIngredients } = useContext(NetworkContext);
@@ -86,6 +88,35 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 	useEffect(() => {
 		setIngToEdit('');
 	}, [isEditing]);
+
+	useEffect(() => {
+		if (ings && allIngredients) {
+			let unusedIngredients = [];
+			for (let i = 0; i < allIngredients.length; i++) {
+				for (let j = 0; j < ings.length; j++) {
+					if (ings[j].IngredientName === allIngredients[i].IngredientName) {
+						break;
+					} else if (j == ings.length - 1) {
+						unusedIngredients = unusedIngredients.concat(allIngredients[i]);
+					}
+				}
+			}
+			setNewIngredients(unusedIngredients);
+		}
+	}, [allIngredients]);
+
+	useEffect(() => {
+		if (ingToAdd == '') {
+			setSearchData(null);
+		} else if (newIngredients) {
+			const updatedData = newIngredients.filter((ing) => {
+				const item_data = `${ing.IngredientName.toUpperCase().slice(0, -1)}`;
+				const text_data = ingToAdd.toUpperCase();
+				return item_data.indexOf(text_data) > -1;
+			});
+			setSearchData(updatedData);
+		}
+	}, [ingToAdd]);
 
 	console.log('RecipeIngredients');
 	console.log(ings);
@@ -187,16 +218,23 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 						}}
 					/>
 				)}
-				{isEditing &&
-					addIngredient &&
-					allIngredients &&
-					allIngredients.map((ing) => {
-						return (
-							<Chip key={ing.IngredientId} style={{}}>
-								{ing.IngredientName}
-							</Chip>
-						);
-					})}
+				{isEditing && addIngredient && searchData && (
+					<View style={styleSheet.ingredientsContainer}>
+						{searchData.map((ing) => {
+							return (
+								<Chip
+									key={ing.IngredientId}
+									style={styleSheet.ingredientChip}
+									onPress={() => {
+										setIngToAdd(ing.IngredientName);
+									}}
+								>
+									{ing.IngredientName}
+								</Chip>
+							);
+						})}
+					</View>
+				)}
 				{isEditing && addIngredient && (
 					<View style={styleSheet.recipeInputContainer}>
 						<TextInput

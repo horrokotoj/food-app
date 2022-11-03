@@ -99,4 +99,10 @@ export const styleSheet = StyleSheet.create({
 	addButtonLabelStyle: {
 		fontSize: 35,
 	},
+	ingredientsContainer: { flexDirection: 'row', flexWrap: 'wrap' },
+	ingredientChip: {
+		borderRadius: 10,
+		margin: 3,
+		backgroundColor: 'rgb(255, 219, 209)',
+	},
 });

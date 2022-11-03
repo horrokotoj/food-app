@@ -99,7 +99,7 @@ const RecipeScreen = ({ route, navigation }) => {
 					/>
 				)}
 			</Appbar.Header>
-			<ScrollView>
+			<ScrollView keyboardShouldPersistTaps={'handled'}>
 				<KeyboardAvoidingView
 					behavior={Platform.OS === 'ios' ? 'padding' : null}
 				>
