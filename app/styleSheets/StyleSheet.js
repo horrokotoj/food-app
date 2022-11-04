@@ -72,11 +72,10 @@ export const styleSheet = StyleSheet.create({
 		width: '66%',
 	},
 	recipeAdd: {
-		width: '50%',
+		width: '88%',
 	},
 	recipeQuant: {
-		marginLeft: 10,
-		width: '20%',
+		width: '50%',
 	},
 	recipeStepInputTitle: {
 		width: '5%',

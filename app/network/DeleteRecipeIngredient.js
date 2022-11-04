@@ -1,14 +1,14 @@
 import { DOMAIN_SERVER, PORT_SERVER } from '@env';
 
-export default async function PatchRecipeIngredient(token, patchObj) {
+export default async function DeleteRecipeIngredient(token, patchObj) {
 	let endpoint =
 		'http://' + DOMAIN_SERVER + ':' + PORT_SERVER + '/recipeingredient/';
 	let body = JSON.stringify(patchObj);
 
-	console.log('Entered PatchRecipeIngredient');
+	console.log('Entered DeleteRecipeIngredient');
 	try {
 		let response = await fetch(endpoint, {
-			method: 'PATCH',
+			method: 'DELETE',
 			headers: {
 				Authorization: 'Bearer ' + token,
 				'Content-Type': 'application/json',

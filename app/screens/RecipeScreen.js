@@ -1,5 +1,5 @@
-import { useState, useContext, useEffect } from 'react';
-import { ScrollView, KeyboardAvoidingView } from 'react-native';
+import { useState, useContext, useEffect, useCallback } from 'react';
+import { ScrollView, RefreshControl, KeyboardAvoidingView } from 'react-native';
 import {
 	Appbar,
 	Menu,
@@ -9,6 +9,9 @@ import {
 	Paragraph,
 	TextInput,
 	Button,
+	Portal,
+	Modal,
+	Text,
 } from 'react-native-paper';
 import { styleSheet } from '../styleSheets/StyleSheet';
 
@@ -21,9 +24,12 @@ import RecipeIngredients from '../components/RecipeIngredients';
 import RecipeStep from '../components/RecipeStep';
 
 const RecipeScreen = ({ route, navigation }) => {
+	const [refreshing, setRefreshing] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [recipeIngredients, setRecipeIngredients] = useState(null);
 	const [recipeSteps, setRecipeSteps] = useState(null);
+
+	const [addIngredient, setAddIngredient] = useState(false);
 
 	const { recipe } = route.params;
 
@@ -32,6 +38,21 @@ const RecipeScreen = ({ route, navigation }) => {
 	const { getRecipeIngredients, getRecipeSteps } = useContext(NetworkContext);
 
 	const MORE_ICON = Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical';
+
+	const onRefresh = useCallback(async () => {
+		setRefreshing(true);
+		const getRecipeIngredientsOnRender = async () => {
+			await handleGetRecipeIngredients();
+		};
+
+		const getRecipeStepsOnRender = async () => {
+			await handleGetRecipeSteps();
+		};
+
+		getRecipeIngredientsOnRender();
+		getRecipeStepsOnRender();
+		setRefreshing(false);
+	}, []);
 
 	const handleGetRecipeIngredients = async () => {
 		let response;
@@ -64,6 +85,7 @@ const RecipeScreen = ({ route, navigation }) => {
 	};
 
 	useEffect(() => {
+		console.log('Effect recipe');
 		const getRecipeIngredientsOnRender = async () => {
 			await handleGetRecipeIngredients();
 		};
@@ -99,7 +121,12 @@ const RecipeScreen = ({ route, navigation }) => {
 					/>
 				)}
 			</Appbar.Header>
-			<ScrollView keyboardShouldPersistTaps={'handled'}>
+			<ScrollView
+				keyboardShouldPersistTaps={'handled'}
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+				}
+			>
 				<KeyboardAvoidingView
 					behavior={Platform.OS === 'ios' ? 'padding' : null}
 				>
@@ -120,7 +147,6 @@ const RecipeScreen = ({ route, navigation }) => {
 							{(recipeSteps || isEditing) && (
 								<Title style={styleSheet.recipeTitle}>Steps:</Title>
 							)}
-
 							{recipeSteps &&
 								!isEditing &&
 								recipeSteps.map((recipeStep) => {

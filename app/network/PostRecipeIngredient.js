@@ -1,14 +1,14 @@
 import { DOMAIN_SERVER, PORT_SERVER } from '@env';
 
-export default async function PatchRecipeIngredient(token, patchObj) {
+export default async function PostRecipeIngredient(token, patchObj) {
 	let endpoint =
 		'http://' + DOMAIN_SERVER + ':' + PORT_SERVER + '/recipeingredient/';
 	let body = JSON.stringify(patchObj);
 
-	console.log('Entered PatchRecipeIngredient');
+	console.log('Entered PostRecipeIngredient');
 	try {
 		let response = await fetch(endpoint, {
-			method: 'PATCH',
+			method: 'POST',
 			headers: {
 				Authorization: 'Bearer ' + token,
 				'Content-Type': 'application/json',
@@ -18,7 +18,9 @@ export default async function PatchRecipeIngredient(token, patchObj) {
 
 		if (response.status === 200) {
 			console.log(response.status);
-			return true;
+			let json = await response.json();
+			console.log(json);
+			return json;
 		} else if (response.status === 400) {
 			console.log(response.status);
 			return false;
