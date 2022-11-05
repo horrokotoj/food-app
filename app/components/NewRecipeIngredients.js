@@ -15,7 +15,7 @@ import { styleSheet } from '../styleSheets/StyleSheet';
 import { AccessTokenContext } from '../context/AccessTokenContext';
 import { NetworkContext } from '../context/NetworkContext';
 
-const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
+const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 	const [ings, setIngs] = useState('');
 	const [ingToEdit, setIngToEdit] = useState('');
 	const [editIng, setEditIng] = useState('');
@@ -39,106 +39,6 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 		getMeasurements,
 		postIngredient,
 	} = useContext(NetworkContext);
-
-	const amountRef = useRef();
-
-	const patch = async (ingredientId) => {
-		let bodyObj = {
-			RecipeId: recipeId,
-			IngredientId: ingredientId,
-			Quantity: editIng,
-		};
-		if (await patchRecipeIngredient(accessToken, bodyObj)) {
-			console.log('After patch');
-			let tmpEditIng = editIng;
-			let tmpIngs = ings.map((ing) =>
-				ing.IngredientId === ingredientId
-					? { ...ing, Quantity: tmpEditIng }
-					: ing
-			);
-			setIngs(tmpIngs);
-			setIngToEdit('');
-			setEditIng('');
-		}
-	};
-
-	const confirmDelete = (ingredientName) => {
-		return Alert.alert('Description will be removed', '', [
-			// The "Yes" button
-			{
-				text: 'Yes',
-				onPress: async () => {
-					const ingredientId = getIngredientId(ingredientName, ings);
-					console.log(ingredientId);
-					let bodyObj = {
-						RecipeId: recipeId,
-						IngredientId: ingredientId,
-					};
-					if (await deleteRecipeIngredient(accessToken, bodyObj)) {
-						console.log('After delete');
-						let tmpIngs = [];
-						for (let i = 0; i < ings.length; i++) {
-							if (ingredientId != ings[i].IngredientId) {
-								tmpIngs = tmpIngs.concat(ings[i]);
-							}
-						}
-						setIngs(tmpIngs);
-						setIngToEdit('');
-						setEditIng('');
-					}
-				},
-			},
-			// The "No" button
-			// Does nothing but dismiss the dialog when tapped
-			{
-				text: 'No',
-				onPress: () => {
-					alert('no');
-				},
-			},
-		]);
-	};
-
-	const add = async (ingToAdd, quantToAdd, measurement, ingredientId) => {
-		console.log('In add');
-		console.log(measurement);
-
-		if (newIngredients && ingToAdd && quantToAdd) {
-			if (!ingredientId) {
-				for (let i = 0; i < newIngredients.length; i++) {
-					if (ingToAdd === newIngredients[i].IngredientName) {
-						ingredientId = newIngredients[i].IngredientId;
-						break;
-					}
-				}
-			}
-			console.log(ingredientId);
-
-			if (ingredientId) {
-				let bodyObj = {
-					RecipeId: recipeId,
-					IngredientId: ingredientId,
-					Quantity: quantToAdd,
-				};
-				if (await postRecipeIngredient(accessToken, bodyObj)) {
-					console.log('After add');
-					let tmpIngs = ings.concat({
-						IngredientId: ingredientId,
-						IngredientName: ingToAdd,
-						MeasurementName: measurement.MeasurementName,
-						Quantity: quantToAdd,
-					});
-					setIngs(tmpIngs);
-					setAddIngredient(false);
-					setMeasurement(null);
-					setIngToAdd('');
-					setQuantToAdd('');
-				}
-			} else {
-				alert('Failed to add');
-			}
-		}
-	};
 
 	const addNew = async (ingToAdd, quantToAdd, measurement) => {
 		console.log('In addNew');
@@ -486,4 +386,4 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 	}
 };
 
-export default RecipeIngredients;
+export default NewRecipeIngredients;

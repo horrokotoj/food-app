@@ -21,7 +21,8 @@ import { UsernameContext } from '../context/UsernameContext';
 
 import RecipeDesc from '../components/RecipeDesc';
 import RecipeIngredients from '../components/RecipeIngredients';
-import RecipeStep from '../components/RecipeStep';
+import RecipeSteps from '../components/RecipeSteps';
+import Portions from '../components/Portions';
 
 const RecipeScreen = ({ route, navigation }) => {
 	const [refreshing, setRefreshing] = useState(false);
@@ -143,30 +144,16 @@ const RecipeScreen = ({ route, navigation }) => {
 								isEditing={isEditing}
 								recipeId={recipe.RecipeId}
 							/>
-
-							{(recipeSteps || isEditing) && (
-								<Title style={styleSheet.recipeTitle}>Steps:</Title>
-							)}
-							{recipeSteps &&
-								!isEditing &&
-								recipeSteps.map((recipeStep) => {
-									return <RecipeStep key={recipeStep.Step} step={recipeStep} />;
-								})}
-
-							{isEditing && (
-								<Button
-									icon='plus-circle-outline'
-									labelStyle={styleSheet.addButtonLabelStyle}
-									style={styleSheet.addButton}
-									onPress={() => {}}
-								/>
-							)}
-							{(recipe.RecipePortions || isEditing) && (
-								<Title style={styleSheet.recipeTitle}>Portions:</Title>
-							)}
-							{recipe.RecipePortions && !isEditing && (
-								<Paragraph>{recipe.RecipePortions}</Paragraph>
-							)}
+							<RecipeSteps
+								isEditing={isEditing}
+								recipeId={recipe.RecipeId}
+								recipeSteps={recipeSteps}
+							/>
+							<Portions
+								isEditing={isEditing}
+								recipeId={recipe.RecipeId}
+								RecipePortions={recipe.RecipePortions}
+							/>
 						</Card.Content>
 					</Card>
 				</KeyboardAvoidingView>

@@ -1,14 +1,13 @@
 import { DOMAIN_SERVER, PORT_SERVER } from '@env';
 
-export default async function PostRecipeIngredient(token, patchObj) {
-	let endpoint =
-		'http://' + DOMAIN_SERVER + ':' + PORT_SERVER + '/recipeingredient/';
+export default async function PatchRecipeStep(token, patchObj) {
+	let endpoint = 'http://' + DOMAIN_SERVER + ':' + PORT_SERVER + '/recipestep/';
 	let body = JSON.stringify(patchObj);
 
-	console.log('Entered PostRecipeIngredient');
+	console.log('Entered PatchRecipeStep');
 	try {
 		let response = await fetch(endpoint, {
-			method: 'POST',
+			method: 'PATCH',
 			headers: {
 				Authorization: 'Bearer ' + token,
 				'Content-Type': 'application/json',

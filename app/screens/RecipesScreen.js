@@ -11,7 +11,7 @@ import { AccessTokenContext } from '../context/AccessTokenContext';
 import { styleSheet } from '../styleSheets/StyleSheet';
 import Recipe from '../components/Recipe';
 
-const RecipesScreen = (props) => {
+const RecipesScreen = ({ navigation }) => {
 	const [recipes, setRecipes] = useState('');
 	const [refreshing, setRefreshing] = useState(false);
 	const accessToken = useContext(AccessTokenContext);
@@ -45,47 +45,57 @@ const RecipesScreen = (props) => {
 	console.log('Recipes in RecipesScreen');
 
 	return (
-		<View style={styleSheet.container}>
-			{recipes ? (
-				<ScrollView
-					refreshControl={
-						<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-					}
-				>
-					{recipes ? (
-						recipes.map((recipe) => {
-							let recipeId = recipe.RecipeId;
-							return (
-								<View key={recipeId}>
-									<TouchableOpacity
-										onPress={() => {
-											props.navigation.navigate('Recipe', {
-												recipe: recipe,
-											});
-										}}
-									>
-										<Recipe recipe={recipe}></Recipe>
-									</TouchableOpacity>
-								</View>
-							);
-						})
-					) : (
-						<></>
-					)}
-				</ScrollView>
-			) : (
+		<>
+			<View style={styleSheet.container}>
+				{recipes ? (
+					<ScrollView
+						refreshControl={
+							<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+						}
+					>
+						{recipes ? (
+							recipes.map((recipe) => {
+								let recipeId = recipe.RecipeId;
+								return (
+									<View key={recipeId}>
+										<TouchableOpacity
+											onPress={() => {
+												navigation.navigate('Recipe', {
+													recipe: recipe,
+												});
+											}}
+										>
+											<Recipe recipe={recipe}></Recipe>
+										</TouchableOpacity>
+									</View>
+								);
+							})
+						) : (
+							<></>
+						)}
+					</ScrollView>
+				) : (
+					<Button
+						mode='contained'
+						labelStyle={styleSheet.buttonLabelStyle}
+						style={styleSheet.button}
+						onPress={() => {
+							handleGetRecipes();
+						}}
+					>
+						Get recipes
+					</Button>
+				)}
 				<Button
-					mode='contained'
-					labelStyle={styleSheet.buttonLabelStyle}
-					style={styleSheet.button}
+					icon='plus-circle-outline'
+					labelStyle={styleSheet.addRecipeButtonLabelStyle}
+					style={styleSheet.addRecipeButton}
 					onPress={() => {
-						handleGetRecipes();
+						navigation.navigate('New recipe');
 					}}
-				>
-					Get recipes
-				</Button>
-			)}
-		</View>
+				/>
+			</View>
+		</>
 	);
 };
 

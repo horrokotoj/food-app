@@ -80,6 +80,13 @@ export const styleSheet = StyleSheet.create({
 	recipeStepInputTitle: {
 		width: '5%',
 	},
+	recipeStep: {
+		width: '15%',
+	},
+	recipeStepDesc: {
+		width: '45%',
+		marginLeft: 10,
+	},
 	closeButton: {
 		justifyContent: 'center',
 		width: '10%',
@@ -94,6 +101,12 @@ export const styleSheet = StyleSheet.create({
 	addButton: {
 		justifyContent: 'center',
 		marginTop: 5,
+	},
+	addRecipeButton: {
+		flexDirection: 'row-reverse',
+	},
+	addRecipeButtonLabelStyle: {
+		fontSize: 50,
 	},
 	addButtonLabelStyle: {
 		fontSize: 35,
