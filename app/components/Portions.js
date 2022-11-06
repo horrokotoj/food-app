@@ -9,7 +9,7 @@ import { NetworkContext } from '../context/NetworkContext';
 const Portions = ({ isEditing, recipeId, RecipePortions }) => {
 	const [portions, setPortions] = useState(null);
 	const [editPortions, setEditPortions] = useState(false);
-	const [portionsEdit, setPortionsEdit] = useState(false);
+	const [portionsEdit, setPortionsEdit] = useState('');
 
 	const accessToken = useContext(AccessTokenContext);
 	const { request } = useContext(NetworkContext);

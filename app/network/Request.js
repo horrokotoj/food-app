@@ -3,18 +3,24 @@ import { DOMAIN_SERVER, PORT_SERVER } from '@env';
 export default async function request(token, patchObj, endpoint, type) {
 	let url =
 		'http://' + DOMAIN_SERVER + ':' + PORT_SERVER + '/' + endpoint + '/';
-	let body = JSON.stringify(patchObj);
+
+	let data = {
+		method: type,
+		headers: {
+			Authorization: 'Bearer ' + token,
+			'Content-Type': 'application/json',
+		},
+	};
+
+	if (patchObj) {
+		let body = JSON.stringify(patchObj);
+		data = { ...data, body: body };
+	}
 
 	console.log('Entered Request');
+	console.log(endpoint + ' ' + type);
 	try {
-		let response = await fetch(url, {
-			method: type,
-			headers: {
-				Authorization: 'Bearer ' + token,
-				'Content-Type': 'application/json',
-			},
-			body: body,
-		});
+		let response = await fetch(url, data);
 
 		if (response.status === 200) {
 			console.log('Status 200');

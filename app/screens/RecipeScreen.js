@@ -1,5 +1,10 @@
 import { useState, useContext, useEffect, useCallback } from 'react';
-import { ScrollView, RefreshControl, KeyboardAvoidingView } from 'react-native';
+import {
+	ScrollView,
+	RefreshControl,
+	KeyboardAvoidingView,
+	View,
+} from 'react-native';
 import {
 	Appbar,
 	Menu,
@@ -12,6 +17,7 @@ import {
 	Portal,
 	Modal,
 	Text,
+	IconButton,
 } from 'react-native-paper';
 import { styleSheet } from '../styleSheets/StyleSheet';
 
@@ -25,18 +31,24 @@ import RecipeSteps from '../components/RecipeSteps';
 import Portions from '../components/Portions';
 
 const RecipeScreen = ({ route, navigation }) => {
+	const [recipe, setRecipe] = useState(null);
 	const [refreshing, setRefreshing] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [recipeIngredients, setRecipeIngredients] = useState(null);
 	const [recipeSteps, setRecipeSteps] = useState(null);
+	const [editImage, setEditImage] = useState(false);
+	const [imageEdit, setImageEdit] = useState('');
+	const [editName, setEditName] = useState(false);
+	const [nameEdit, setNameEdit] = useState('');
 
 	const [addIngredient, setAddIngredient] = useState(false);
 
-	const { recipe } = route.params;
+	const { Recipe } = route.params;
 
 	const accessToken = useContext(AccessTokenContext);
 	const username = useContext(UsernameContext);
-	const { getRecipeIngredients, getRecipeSteps } = useContext(NetworkContext);
+	const { getRecipeIngredients, getRecipeSteps, request } =
+		useContext(NetworkContext);
 
 	const MORE_ICON = Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical';
 
@@ -55,10 +67,34 @@ const RecipeScreen = ({ route, navigation }) => {
 		setRefreshing(false);
 	}, []);
 
+	const patch = async (recipeName, recipeImage) => {
+		let bodyObj = {
+			RecipeId: recipe.RecipeId,
+		};
+		if (recipeName) {
+			bodyObj = { ...bodyObj, RecipeName: recipeName };
+		}
+		if (recipeImage) {
+			bodyObj = { ...bodyObj, RecipeImage: recipeImage };
+		}
+		if (await request(accessToken, bodyObj, 'recipe', 'PATCH')) {
+			let tmpRecipe = recipe;
+			if (recipeName) {
+				tmpRecipe = { ...tmpRecipe, RecipeName: recipeName };
+			}
+			if (recipeImage) {
+				tmpRecipe = { ...tmpRecipe, RecipeImage: recipeImage };
+			}
+			setRecipe(tmpRecipe);
+			setEditImage(false);
+			setEditName(false);
+		}
+	};
+
 	const handleGetRecipeIngredients = async () => {
 		let response;
 		try {
-			response = await getRecipeIngredients(accessToken, recipe.RecipeId);
+			response = await getRecipeIngredients(accessToken, Recipe.RecipeId);
 			if (response.length > 0) {
 				setRecipeIngredients(response);
 			} else {
@@ -72,7 +108,7 @@ const RecipeScreen = ({ route, navigation }) => {
 	const handleGetRecipeSteps = async () => {
 		let response;
 		try {
-			response = await getRecipeSteps(accessToken, recipe.RecipeId);
+			response = await getRecipeSteps(accessToken, Recipe.RecipeId);
 			if (response.length > 0) {
 				console.log('Response in handleGetRecipeSteps');
 				console.log(response);
@@ -94,72 +130,141 @@ const RecipeScreen = ({ route, navigation }) => {
 		const getRecipeStepsOnRender = async () => {
 			await handleGetRecipeSteps();
 		};
-
+		setRecipe(Recipe);
 		getRecipeIngredientsOnRender();
 		getRecipeStepsOnRender();
-	}, [recipe]);
+	}, [Recipe]);
 
 	console.log(recipe);
 
-	return (
-		<Provider>
-			<Appbar.Header>
-				<Appbar.BackAction
-					onPress={() => {
-						setIsEditing(false);
-						navigation.navigate('Recipes');
-					}}
-				/>
-				<Appbar.Content title={recipe.RecipeName} />
-
-				{username === recipe.RecipeOwner && (
-					<Appbar.Action
-						icon={isEditing ? 'check-outline' : MORE_ICON}
-						color='white'
+	if (recipe) {
+		return (
+			<Provider>
+				<Appbar.Header style={{}}>
+					<Appbar.BackAction
 						onPress={() => {
-							setIsEditing(!isEditing);
+							setIsEditing(false);
+							navigation.navigate('Recipes');
 						}}
 					/>
-				)}
-			</Appbar.Header>
-			<ScrollView
-				keyboardShouldPersistTaps={'handled'}
-				refreshControl={
-					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-				}
-			>
-				<KeyboardAvoidingView
-					behavior={Platform.OS === 'ios' ? 'padding' : null}
+					<Appbar.Content
+						title={recipe.RecipeName}
+						onPress={() => {
+							if (isEditing) setEditName(!editName);
+						}}
+					/>
+					{username === recipe.RecipeOwner && isEditing && (
+						<Appbar.Action
+							icon={editImage ? 'close-outline' : 'image-edit-outline'}
+							color='white'
+							onPress={() => {
+								setEditImage(!editImage);
+							}}
+						/>
+					)}
+					{username === recipe.RecipeOwner && (
+						<Appbar.Action
+							icon={isEditing ? 'check-outline' : MORE_ICON}
+							color='white'
+							onPress={() => {
+								setIsEditing(!isEditing);
+							}}
+						/>
+					)}
+				</Appbar.Header>
+				<ScrollView
+					keyboardShouldPersistTaps={'handled'}
+					refreshControl={
+						<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+					}
 				>
-					<Card>
-						<Card.Cover source={{ uri: recipe.RecipeImage }} />
-						<Card.Content>
-							<RecipeDesc
-								recipeDesc={recipe.RecipeDesc}
-								isEditing={isEditing}
-								recipeId={recipe.RecipeId}
-							/>
-							<RecipeIngredients
-								recipeIngredients={recipeIngredients}
-								isEditing={isEditing}
-								recipeId={recipe.RecipeId}
-							/>
-							<RecipeSteps
-								isEditing={isEditing}
-								recipeId={recipe.RecipeId}
-								recipeSteps={recipeSteps}
-							/>
-							<Portions
-								isEditing={isEditing}
-								recipeId={recipe.RecipeId}
-								RecipePortions={recipe.RecipePortions}
-							/>
-						</Card.Content>
-					</Card>
-				</KeyboardAvoidingView>
-			</ScrollView>
-		</Provider>
-	);
+					<KeyboardAvoidingView
+						behavior={Platform.OS === 'ios' ? 'padding' : null}
+					>
+						<Card>
+							<Card.Cover source={{ uri: recipe.RecipeImage }} />
+							<Card.Content>
+								{editName && (
+									<>
+										<Title>Name: </Title>
+										<View style={styleSheet.recipeInputContainer}>
+											<TextInput
+												style={styleSheet.recipeInput}
+												label={
+													recipe.RecipeName ? recipe.RecipeName : 'Recipe name'
+												}
+												value={nameEdit}
+												mode='outlined'
+												onChangeText={setNameEdit}
+												onSubmitEditing={() => {
+													patch(nameEdit, null);
+												}}
+											/>
+											<IconButton
+												icon='check-outline'
+												size={20}
+												onPress={() => {
+													patch(nameEdit, null);
+												}}
+											/>
+										</View>
+									</>
+								)}
+								{editImage && (
+									<>
+										<Title>Image: </Title>
+										<View style={styleSheet.recipeInputContainer}>
+											<TextInput
+												style={styleSheet.recipeInput}
+												label={
+													recipe.RecipeImage ? recipe.RecipeImage : 'image-url'
+												}
+												value={imageEdit}
+												mode='outlined'
+												onChangeText={setImageEdit}
+												onSubmitEditing={() => {
+													patch(null, imageEdit);
+												}}
+											/>
+											<IconButton
+												icon='check-outline'
+												size={20}
+												onPress={() => {
+													patch(null, imageEdit);
+												}}
+											/>
+										</View>
+									</>
+								)}
+								<RecipeDesc
+									recipeDesc={recipe.RecipeDesc}
+									isEditing={isEditing}
+									recipeId={recipe.RecipeId}
+								/>
+								<RecipeIngredients
+									recipeIngredients={recipeIngredients}
+									isEditing={isEditing}
+									recipeId={recipe.RecipeId}
+								/>
+								<RecipeSteps
+									isEditing={isEditing}
+									recipeId={recipe.RecipeId}
+									recipeSteps={recipeSteps}
+								/>
+								<Portions
+									isEditing={isEditing}
+									recipeId={recipe.RecipeId}
+									RecipePortions={recipe.RecipePortions}
+								/>
+							</Card.Content>
+						</Card>
+					</KeyboardAvoidingView>
+				</ScrollView>
+			</Provider>
+		);
+	} else {
+		return <></>;
+	}
 };
 
 export default RecipeScreen;

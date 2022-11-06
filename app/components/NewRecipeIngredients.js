@@ -16,7 +16,6 @@ import { AccessTokenContext } from '../context/AccessTokenContext';
 import { NetworkContext } from '../context/NetworkContext';
 
 const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
-	const [ings, setIngs] = useState('');
 	const [ingToEdit, setIngToEdit] = useState('');
 	const [editIng, setEditIng] = useState('');
 	const [addIngredient, setAddIngredient] = useState(false);
@@ -31,14 +30,35 @@ const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 	const [allMeasurements, setAllMeasurements] = useState(null);
 
 	const accessToken = useContext(AccessTokenContext);
-	const {
-		patchRecipeIngredient,
-		deleteRecipeIngredient,
-		getIngredients,
-		postRecipeIngredient,
-		getMeasurements,
-		postIngredient,
-	} = useContext(NetworkContext);
+	const { request } = useContext(NetworkContext);
+
+	const amountRef = useRef();
+
+	const add = (ingToAdd, quantToAdd, measurement, ingredientId) => {
+		console.log('In add');
+
+		if (newIngredients && ingToAdd && quantToAdd) {
+			if (!ingredientId) {
+				ingredientId = getIngredientId(ingToAdd, newIngredients);
+			}
+
+			if (ingredientId) {
+				let tmpIngs = recipeIngredients.concat({
+					IngredientId: ingredientId,
+					IngredientName: ingToAdd,
+					MeasurementName: measurement.MeasurementName,
+					Quantity: quantToAdd,
+				});
+				setRecipeIngredients(tmpIngs);
+				setAddIngredient(false);
+				setMeasurement(null);
+				setIngToAdd('');
+				setQuantToAdd('');
+			} else {
+				alert('Failed to add');
+			}
+		}
+	};
 
 	const addNew = async (ingToAdd, quantToAdd, measurement) => {
 		console.log('In addNew');
@@ -47,8 +67,9 @@ const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 				IngredientName: ingToAdd,
 				MeasurementId: measurement.MeasurementId,
 			};
-			let response = await postIngredient(accessToken, bodyObj);
+			let response = await request(accessToken, bodyObj, 'ingredient', 'POST');
 			if (response.insertId) {
+				setAddingNew(false);
 				add(ingToAdd, quantToAdd, measurement, response.insertId);
 			} else {
 				console.log('failed to add new');
@@ -56,13 +77,45 @@ const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 		}
 	};
 
+	const confirmDelete = (ingredientName) => {
+		return Alert.alert('Description will be removed', '', [
+			// The "Yes" button
+			{
+				text: 'Yes',
+				onPress: async () => {
+					const ingredientId = getIngredientId(
+						ingredientName,
+						recipeIngredients
+					);
+					console.log(ingredientId);
+
+					let tmpIngs = [];
+					for (let i = 0; i < recipeIngredients.length; i++) {
+						if (ingredientId != recipeIngredients[i].IngredientId) {
+							tmpIngs = tmpIngs.concat(recipeIngredients[i]);
+						}
+					}
+					setRecipeIngredients(tmpIngs);
+					setIngToEdit('');
+					setEditIng('');
+				},
+			},
+			// The "No" button
+			// Does nothing but dismiss the dialog when tapped
+			{
+				text: 'No',
+				onPress: () => {
+					alert('no');
+				},
+			},
+		]);
+	};
+
 	const handleGetMeasurements = async () => {
 		let response;
 		try {
-			response = await getMeasurements(accessToken);
+			response = await request(accessToken, null, 'measurements', 'GET');
 			if (response.length > 0) {
-				console.log('Response in handleGetMeasurements');
-				console.log(response);
 				setAllMeasurements(response);
 			}
 		} catch (err) {
@@ -73,10 +126,8 @@ const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 	const handleGetIngredients = async () => {
 		let response;
 		try {
-			response = await getIngredients(accessToken);
+			response = await request(accessToken, null, 'ingredients', 'GET');
 			if (response.length > 0) {
-				console.log('Response in handleGetRecipeSteps');
-				console.log(response);
 				setAllIngredients(response);
 				return true;
 			}
@@ -106,26 +157,25 @@ const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 	};
 
 	useEffect(() => {
-		if (recipeIngredients) setIngs(recipeIngredients);
-	}, [recipeIngredients]);
-
-	useEffect(() => {
-		setIngToEdit('');
-	}, [isEditing]);
-
-	useEffect(() => {
-		if (ings && allIngredients) {
-			let unusedIngredients = [];
-			for (let i = 0; i < allIngredients.length; i++) {
-				for (let j = 0; j < ings.length; j++) {
-					if (ings[j].IngredientName === allIngredients[i].IngredientName) {
-						break;
-					} else if (j == ings.length - 1) {
-						unusedIngredients = unusedIngredients.concat(allIngredients[i]);
+		if (recipeIngredients && allIngredients) {
+			if (recipeIngredients.length > 0) {
+				let unusedIngredients = [];
+				for (let i = 0; i < allIngredients.length; i++) {
+					for (let j = 0; j < recipeIngredients.length; j++) {
+						if (
+							recipeIngredients[j].IngredientName ===
+							allIngredients[i].IngredientName
+						) {
+							break;
+						} else if (j == recipeIngredients.length - 1) {
+							unusedIngredients = unusedIngredients.concat(allIngredients[i]);
+						}
 					}
 				}
+				setNewIngredients(unusedIngredients);
+			} else {
+				setNewIngredients(allIngredients);
 			}
-			setNewIngredients(unusedIngredients);
 		}
 	}, [allIngredients]);
 
@@ -153,26 +203,11 @@ const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 
 	console.log('RecipeIngredients');
 
-	if (ings && !isEditing) {
-		return (
-			<>
-				<Title>Ingredients: </Title>
-				{ings.map((ing) => {
-					return (
-						<List.Item
-							key={ing.IngredientName}
-							title={ing.IngredientName}
-							description={ing.Quantity + ' ' + ing.MeasurementName}
-						/>
-					);
-				})}
-			</>
-		);
-	} else if (isEditing) {
-		return (
-			<>
-				<Title>Ingredients: </Title>
-				{ings.map((ing) => {
+	return (
+		<>
+			<Title>Ingredients: </Title>
+			{recipeIngredients &&
+				recipeIngredients.map((ing) => {
 					if (ingToEdit === ing.IngredientName) {
 						return (
 							<View
@@ -193,14 +228,14 @@ const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 									keyboardType='numeric'
 									onChangeText={setEditIng}
 									onSubmitEditing={() => {
-										patch(ing.IngredientId);
+										alert(ing.IngredientId);
 									}}
 								/>
 								<IconButton
 									icon='check-outline'
 									size={20}
 									onPress={() => {
-										patch(ing.IngredientId);
+										alert(ing.IngredientId);
 									}}
 								/>
 								<IconButton
@@ -239,151 +274,142 @@ const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 						);
 					}
 				})}
-				{isEditing && !addIngredient && (
-					<Button
-						icon='plus-circle-outline'
-						labelStyle={styleSheet.addButtonLabelStyle}
-						style={styleSheet.addButton}
-						onPress={async () => {
-							setAddIngredient(true);
-							await handleGetIngredients();
+			{!addIngredient && (
+				<Button
+					icon='plus-circle-outline'
+					labelStyle={styleSheet.addButtonLabelStyle}
+					style={styleSheet.addButton}
+					onPress={async () => {
+						setAddIngredient(true);
+						await handleGetIngredients();
+					}}
+				/>
+			)}
+			{addIngredient && (
+				<Portal>
+					<Modal
+						visible={addIngredient}
+						onDismiss={() => {
+							setAddIngredient(false);
 						}}
-					/>
-				)}
-				{isEditing && addIngredient && (
-					<Portal>
-						<Modal
-							visible={addIngredient}
-							onDismiss={() => {
-								setAddIngredient(false);
-							}}
-							style={{ marginBottom: '40%' }}
-							contentContainerStyle={{
-								backgroundColor: 'white',
-								padding: 20,
-								marginLeft: '10%',
-								marginRight: '10%',
-							}}
-						>
-							<View style={styleSheet.ingredientsContainer}>
-								{searchData &&
-									searchData.map((ing) => {
-										return (
-											<Chip
-												key={ing.IngredientId}
-												style={styleSheet.ingredientChip}
-												onPress={() => {
-													setIngToAdd(ing.IngredientName);
-												}}
-											>
-												{ing.IngredientName}
-											</Chip>
-										);
-									})}
-							</View>
-							<View style={styleSheet.recipeInputContainer}>
-								<TextInput
-									style={styleSheet.recipeAdd}
-									value={ingToAdd}
-									mode='outlined'
-									label='Ingredient'
-									multiline={true}
-									onChangeText={setIngToAdd}
-									onSubmit={() => {
-										amountRef.current.focus();
-									}}
-								/>
+						style={{ marginBottom: '40%' }}
+						contentContainerStyle={{
+							backgroundColor: 'white',
+							padding: 25,
+							marginLeft: '10%',
+							marginRight: '10%',
+						}}
+					>
+						<View style={styleSheet.ingredientsContainer}>
+							{searchData &&
+								searchData.map((ing) => {
+									return (
+										<Chip
+											key={ing.IngredientId}
+											style={styleSheet.ingredientChip}
+											onPress={() => {
+												setIngToAdd(ing.IngredientName);
+											}}
+										>
+											{ing.IngredientName}
+										</Chip>
+									);
+								})}
+						</View>
+						<View style={styleSheet.recipeInputContainer}>
+							<TextInput
+								style={styleSheet.recipeAdd}
+								value={ingToAdd}
+								mode='outlined'
+								label='Ingredient'
+								multiline={true}
+								onChangeText={setIngToAdd}
+								onSubmitEditing={() => {
+									amountRef.current.focus();
+								}}
+							/>
 
-								{!match && !addingNew && (
-									<IconButton
-										icon='plus-circle-outline'
-										size={20}
-										onPress={() => {
-											handleNewIngredient();
-										}}
-									/>
-								)}
-								{!match && addingNew && (
-									<IconButton
-										icon='close-circle-outline'
-										size={20}
-										onPress={() => {
-											setAddingNew(false);
-											setMeasurement(null);
-										}}
-									/>
-								)}
-
-								{/*<IconButton
-									icon='pencil-off'
+							{!match && !addingNew && (
+								<IconButton
+									icon='plus-circle-outline'
 									size={20}
 									onPress={() => {
-										setIngToAdd('');
-										setQuantToAdd('');
-										setAddIngredient(false);
+										handleNewIngredient();
 									}}
-								/>*/}
-							</View>
-							<View style={styleSheet.recipeInputContainer}>
-								{addingNew && !measurement && (
-									<View style={styleSheet.ingredientsContainer}>
-										{allMeasurements &&
-											allMeasurements.map((measurement) => {
-												return (
-													<Chip
-														key={measurement.MeasurementId}
-														style={styleSheet.ingredientChip}
-														onPress={() => {
-															setMeasurement(measurement);
-														}}
-													>
-														{measurement.MeasurementName}
-													</Chip>
-												);
-											})}
-									</View>
-								)}
-								{measurement && (
-									<TextInput
-										style={styleSheet.recipeQuant}
-										value={quantToAdd}
-										mode='outlined'
-										keyboardType='numeric'
-										label={measurement.MeasurementName}
-										ref={amountRef}
-										onChangeText={setQuantToAdd}
-										onSubmit={() => {
+								/>
+							)}
+							{!match && addingNew && (
+								<IconButton
+									icon='close-circle-outline'
+									size={20}
+									onPress={() => {
+										setAddingNew(false);
+										setMeasurement(null);
+									}}
+								/>
+							)}
+						</View>
+						<View style={styleSheet.recipeInputContainer}>
+							{addingNew && !measurement && (
+								<View style={styleSheet.ingredientsContainer}>
+									{allMeasurements &&
+										allMeasurements.map((measurement) => {
+											return (
+												<Chip
+													key={measurement.MeasurementId}
+													style={styleSheet.ingredientChip}
+													onPress={() => {
+														setMeasurement(measurement);
+													}}
+												>
+													{measurement.MeasurementName}
+												</Chip>
+											);
+										})}
+								</View>
+							)}
+							{measurement && (
+								<TextInput
+									style={styleSheet.recipeQuant}
+									value={quantToAdd}
+									mode='outlined'
+									keyboardType='numeric'
+									label={measurement.MeasurementName}
+									ref={amountRef}
+									onChangeText={setQuantToAdd}
+									onSubmitEditing={() => {
+										if (match) {
 											add(ingToAdd, quantToAdd, measurement);
-										}}
-									/>
-								)}
-								{match && measurement && (
-									<IconButton
-										icon='check-outline'
-										size={20}
-										onPress={() => {
-											add(ingToAdd, quantToAdd, measurement);
-										}}
-									/>
-								)}
-								{!match && measurement && (
-									<IconButton
-										icon='check'
-										size={20}
-										onPress={() => {
+										} else {
 											addNew(ingToAdd, quantToAdd, measurement);
-										}}
-									/>
-								)}
-							</View>
-						</Modal>
-					</Portal>
-				)}
-			</>
-		);
-	} else {
-		return <></>;
-	}
+										}
+									}}
+								/>
+							)}
+							{match && measurement && (
+								<IconButton
+									icon='check-outline'
+									size={20}
+									onPress={() => {
+										add(ingToAdd, quantToAdd, measurement);
+									}}
+								/>
+							)}
+							{!match && measurement && (
+								<IconButton
+									icon='check'
+									size={20}
+									onPress={() => {
+										addNew(ingToAdd, quantToAdd, measurement);
+									}}
+								/>
+							)}
+						</View>
+					</Modal>
+				</Portal>
+			)}
+		</>
+	);
 };
 
 export default NewRecipeIngredients;

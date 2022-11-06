@@ -226,7 +226,7 @@ const Portions = ({ isEditing, recipeId, recipeSteps }) => {
 					} else {
 						return (
 							<List.Item
-								key={step.Step}
+								key={step.StepId}
 								title={step.Step + '. ' + step.StepDesc}
 								right={() => (
 									<IconButton

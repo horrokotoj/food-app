@@ -61,7 +61,7 @@ const RecipesScreen = ({ navigation }) => {
 										<TouchableOpacity
 											onPress={() => {
 												navigation.navigate('Recipe', {
-													recipe: recipe,
+													Recipe: recipe,
 												});
 											}}
 										>

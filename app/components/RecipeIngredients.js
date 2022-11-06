@@ -389,7 +389,7 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 									label='Ingredient'
 									multiline={true}
 									onChangeText={setIngToAdd}
-									onSubmit={() => {
+									onSubmitEditing={() => {
 										amountRef.current.focus();
 									}}
 								/>
@@ -452,7 +452,7 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 										label={measurement.MeasurementName}
 										ref={amountRef}
 										onChangeText={setQuantToAdd}
-										onSubmit={() => {
+										onSubmitEditing={() => {
 											add(ingToAdd, quantToAdd, measurement);
 										}}
 									/>

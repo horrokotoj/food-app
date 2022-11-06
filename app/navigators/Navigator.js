@@ -564,6 +564,7 @@ export default function Navigator() {
 							);
 							if (newResponse === 500) {
 								alert('Unable to refresh access token');
+								signOut();
 							} else if (newResponse) {
 								return newResponse;
 							}
