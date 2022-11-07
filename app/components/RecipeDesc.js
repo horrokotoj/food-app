@@ -48,9 +48,7 @@ const RecipeDesc = ({ recipeDesc, isEditing, recipeId }) => {
       // Does nothing but dismiss the dialog when tapped
       {
         text: 'No',
-        onPress: () => {
-          alert('no');
-        },
+        onPress: () => {},
       },
     ]);
   };
