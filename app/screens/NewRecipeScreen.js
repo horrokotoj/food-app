@@ -39,7 +39,6 @@ const NewRecipeScreen = ({ route, navigation }) => {
 	const [lookForError, setLookForError] = useState(false);
 
 	const accessToken = useContext(AccessTokenContext);
-	const username = useContext(UsernameContext);
 	const { request } = useContext(NetworkContext);
 
 	const MORE_ICON = Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical';

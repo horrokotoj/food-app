@@ -15,12 +15,12 @@ const RecipesScreen = ({ navigation }) => {
 	const [recipes, setRecipes] = useState('');
 	const [refreshing, setRefreshing] = useState(false);
 	const accessToken = useContext(AccessTokenContext);
-	const { getRecipes } = useContext(NetworkContext);
+	const { request } = useContext(NetworkContext);
 
 	const handleGetRecipes = async () => {
 		let response;
 		try {
-			response = await getRecipes(accessToken);
+			response = await request(accessToken, null, 'recipes', 'GET');
 			if (response) {
 				setRecipes(response);
 			}
