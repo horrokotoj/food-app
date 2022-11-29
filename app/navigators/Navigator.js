@@ -173,16 +173,7 @@ export default function Navigator() {
 					console.log(response);
 					if (response === 200) {
 						console.log('register successfull');
-						response = await LoginRequest(signupUsername, password);
-						if (response) {
-							let newRefreshToken = response.refreshToken;
-							let newAccessToken = response.accessToken;
-							await SecureStore.setItemAsync('refreshToken', newRefreshToken);
-							await SecureStore.setItemAsync('username', signupUsername);
-							setAccessToken(newAccessToken);
-							setUsername(signupUsername);
-							dispatch({ type: 'SIGN_IN' });
-						}
+						alert('Please verify your account via your email before you login');
 					} else if (response === 409) {
 						console.log('register unsuccessfull');
 						alert('Username or email already in use');
