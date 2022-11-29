@@ -42,7 +42,6 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 			Quantity: editIng,
 		};
 		if (await request(accessToken, bodyObj, 'recipeingredient', 'PATCH')) {
-			console.log('After patch');
 			let tmpEditIng = editIng;
 			let tmpIngs = ings.map((ing) =>
 				ing.IngredientId === ingredientId
@@ -62,7 +61,6 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 				text: 'Yes',
 				onPress: async () => {
 					const ingredientId = getIngredientId(ingredientName, ings);
-					console.log(ingredientId);
 					let bodyObj = {
 						RecipeId: recipeId,
 						IngredientId: ingredientId,
@@ -70,7 +68,6 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 					if (
 						await request(accessToken, bodyObj, 'recipeingredient', 'DELETE')
 					) {
-						console.log('After delete');
 						let tmpIngs = [];
 						for (let i = 0; i < ings.length; i++) {
 							if (ingredientId != ings[i].IngredientId) {
@@ -93,9 +90,6 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 	};
 
 	const add = async (ingToAdd, quantToAdd, measurement, ingredientId) => {
-		console.log('In add');
-		console.log(measurement);
-
 		if (newIngredients && ingToAdd && quantToAdd) {
 			if (!ingredientId) {
 				for (let i = 0; i < newIngredients.length; i++) {
@@ -105,8 +99,6 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 					}
 				}
 			}
-			console.log(ingredientId);
-
 			if (ingredientId) {
 				let bodyObj = {
 					RecipeId: recipeId,
@@ -114,7 +106,6 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 					Quantity: quantToAdd,
 				};
 				if (await request(accessToken, bodyObj, 'recipeingredient', 'POST')) {
-					console.log('After add');
 					let tmpIngs = ings.concat({
 						IngredientId: ingredientId,
 						IngredientName: ingToAdd,
@@ -134,7 +125,6 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 	};
 
 	const addNew = async (ingToAdd, quantToAdd, measurement) => {
-		console.log('In addNew');
 		if (ingToAdd && quantToAdd && measurement.MeasurementId) {
 			let bodyObj = {
 				IngredientName: ingToAdd,
@@ -154,8 +144,6 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 		try {
 			response = await request(accessToken, null, 'measurements', 'GET');
 			if (response.length > 0) {
-				console.log('Response in handleGetMeasurements');
-				console.log(response);
 				setAllMeasurements(response);
 			}
 		} catch (err) {
@@ -168,8 +156,6 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 		try {
 			response = await request(accessToken, null, 'ingredients', 'GET');
 			if (response.length > 0) {
-				console.log('Response in handleGetIngredients');
-				console.log(response);
 				setAllIngredients(response);
 				return true;
 			}
@@ -228,7 +214,6 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 			let match = false;
 			let measurement = null;
 			const updatedData = newIngredients.filter((ing) => {
-				console.log(ing);
 				if (ingToAdd.toUpperCase() === ing.IngredientName.toUpperCase()) {
 					match = true;
 					measurement = { MeasurementName: ing.Measurement };

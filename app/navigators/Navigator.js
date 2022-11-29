@@ -183,9 +183,12 @@ export default function Navigator() {
 							setUsername(signupUsername);
 							dispatch({ type: 'SIGN_IN' });
 						}
+					} else if (response === 409) {
+						console.log('register unsuccessfull');
+						alert('Username or email already in use');
 					} else {
 						console.log('register unsuccessfull');
-						alert('Register failed');
+						alert('Unknown failure');
 					}
 				} catch (e) {
 					console.log(e);
@@ -202,7 +205,6 @@ export default function Navigator() {
 				let refreshToken = await SecureStore.getItemAsync('refreshToken');
 				if (refreshToken) {
 					let response = await RefreshToken(refreshToken);
-					console.log(response);
 					if (response) {
 						setAccessToken(response.token);
 					}
@@ -216,17 +218,23 @@ export default function Navigator() {
 						let maybeAccessToken = await refreshAccessToken();
 						if (maybeAccessToken) {
 							let newResponse = await Request(
-								accessToken,
+								maybeAccessToken,
 								bodyObj,
 								endpoint,
 								type
 							);
-							if (newResponse === 500) {
-								alert('Unable to refresh access token');
-								signOut();
+							if (newResponse === 403) {
+								alert('Request with new token failed due to invalid token');
+								return false;
 							} else if (newResponse) {
 								return newResponse;
+							} else {
+								alert('Request with new token failed');
+								return false;
 							}
+						} else {
+							alert('Unable to refresh access token');
+							signOut();
 						}
 					}
 					if (response === 500) {

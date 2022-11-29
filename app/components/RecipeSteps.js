@@ -30,7 +30,6 @@ const Portions = ({ isEditing, recipeId, recipeSteps }) => {
 		}
 		let response = await request(accessToken, bodyObj, 'recipestep', 'PATCH');
 		if (response) {
-			console.log('After patch');
 			let tmpSteps;
 			if (editStep && editStepDesc) {
 				tmpSteps = steps.map((step) =>
@@ -77,7 +76,6 @@ const Portions = ({ isEditing, recipeId, recipeSteps }) => {
 						'DELETE'
 					);
 					if (response) {
-						console.log('After delete');
 						let tmpSteps = [];
 						for (let i = 0; i < steps.length; i++) {
 							if (stepId != steps[i].StepId) {
@@ -107,8 +105,6 @@ const Portions = ({ isEditing, recipeId, recipeSteps }) => {
 	};
 
 	const add = async (recipeId, newStep, newStepDesc) => {
-		console.log('In add');
-
 		if (recipeId && newStep && newStepDesc) {
 			let bodyObj = {
 				Step: newStep,
@@ -118,7 +114,6 @@ const Portions = ({ isEditing, recipeId, recipeSteps }) => {
 			let response = await request(accessToken, bodyObj, 'recipestep', 'POST');
 
 			if (response.insertId) {
-				console.log('After add');
 				let tmpSteps = steps.concat({
 					StepId: response.insertId,
 					Step: newStep,
@@ -154,8 +149,6 @@ const Portions = ({ isEditing, recipeId, recipeSteps }) => {
 		setNewStepDesc('');
 		setAddStep(false);
 	}, [isEditing]);
-
-	console.log(steps);
 
 	if (steps && !isEditing) {
 		return (

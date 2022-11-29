@@ -102,7 +102,6 @@ const RecipeScreen = ({ route, navigation }) => {
 					};
 
 					if (await request(accessToken, bodyObj, 'recipe', 'DELETE')) {
-						console.log('After delete');
 						navigation.navigate('Recipes');
 					}
 				},
@@ -145,8 +144,6 @@ const RecipeScreen = ({ route, navigation }) => {
 				'GET'
 			);
 			if (response.length > 0) {
-				console.log('Response in handleGetRecipeSteps');
-				console.log(response);
 				setRecipeSteps(response);
 			} else {
 				setRecipeSteps(null);
@@ -157,7 +154,6 @@ const RecipeScreen = ({ route, navigation }) => {
 	};
 
 	useEffect(() => {
-		console.log('Effect recipe');
 		const getRecipeIngredientsOnRender = async () => {
 			await handleGetRecipeIngredients();
 		};
@@ -169,8 +165,6 @@ const RecipeScreen = ({ route, navigation }) => {
 		getRecipeIngredientsOnRender();
 		getRecipeStepsOnRender();
 	}, [Recipe]);
-
-	console.log(recipe);
 
 	if (recipe) {
 		return (

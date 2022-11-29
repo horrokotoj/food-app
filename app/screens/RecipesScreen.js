@@ -12,7 +12,7 @@ import { styleSheet } from '../styleSheets/StyleSheet';
 import Recipe from '../components/Recipe';
 
 const RecipesScreen = ({ navigation }) => {
-	const [recipes, setRecipes] = useState('');
+	const [recipes, setRecipes] = useState(null);
 	const [refreshing, setRefreshing] = useState(false);
 	const accessToken = useContext(AccessTokenContext);
 	const { request } = useContext(NetworkContext);
@@ -23,6 +23,8 @@ const RecipesScreen = ({ navigation }) => {
 			response = await request(accessToken, null, 'recipes', 'GET');
 			if (response) {
 				setRecipes(response);
+			} else {
+				setRecipes(null);
 			}
 		} catch (err) {
 			console.log(err);
@@ -86,14 +88,16 @@ const RecipesScreen = ({ navigation }) => {
 						Get recipes
 					</Button>
 				)}
-				<Button
-					icon='plus-circle-outline'
-					labelStyle={styleSheet.addRecipeButtonLabelStyle}
-					style={styleSheet.addRecipeButton}
-					onPress={() => {
-						navigation.navigate('New recipe');
-					}}
-				/>
+				{recipes && (
+					<Button
+						icon='plus-circle-outline'
+						labelStyle={styleSheet.addRecipeButtonLabelStyle}
+						style={styleSheet.addRecipeButton}
+						onPress={() => {
+							navigation.navigate('New recipe');
+						}}
+					/>
+				)}
 			</View>
 		</>
 	);

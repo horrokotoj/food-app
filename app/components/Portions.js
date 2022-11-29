@@ -22,7 +22,6 @@ const Portions = ({ isEditing, recipeId, RecipePortions }) => {
 			};
 			let response = await request(accessToken, bodyObj, 'recipe', 'PATCH');
 			if (response) {
-				console.log('After patch');
 				setPortions(recipePortions);
 				setEditPortions(false);
 				setPortionsEdit('');

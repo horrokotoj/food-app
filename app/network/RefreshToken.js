@@ -5,19 +5,16 @@ export default async function RefreshToken(refreshToken) {
 
 	console.log('Entered RefreshToken');
 	console.log(refreshToken);
-	let body = JSON.stringify({
-		token: refreshToken,
-	});
-	console.log(body);
+	let data = {
+		method: 'POST',
+		headers: {
+			Authorization: 'Bearer ' + refreshToken,
+			'Content-Type': 'application/json',
+		},
+	};
+	console.log(data);
 	try {
-		let response = await fetch(endpoint, {
-			method: 'POST',
-			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json',
-			},
-			body: body,
-		});
+		let response = await fetch(endpoint, data);
 		if (response.status == 200) {
 			let json = await response.json();
 			console.log(json);

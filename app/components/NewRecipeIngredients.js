@@ -35,8 +35,6 @@ const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 	const amountRef = useRef();
 
 	const add = (ingToAdd, quantToAdd, measurement, ingredientId) => {
-		console.log('In add');
-
 		if (newIngredients && ingToAdd && quantToAdd) {
 			if (!ingredientId) {
 				ingredientId = getIngredientId(ingToAdd, newIngredients);
@@ -61,7 +59,6 @@ const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 	};
 
 	const addNew = async (ingToAdd, quantToAdd, measurement) => {
-		console.log('In addNew');
 		if (ingToAdd && quantToAdd && measurement.MeasurementId) {
 			let bodyObj = {
 				IngredientName: ingToAdd,
@@ -146,7 +143,6 @@ const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 	};
 
 	const getIngredientId = (ingredientName, dataSet) => {
-		let id;
 		if (ingredientName && dataSet) {
 			for (let i = 0; i < dataSet.length; i++) {
 				if (ingredientName === dataSet[i].IngredientName) {

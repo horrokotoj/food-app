@@ -25,11 +25,14 @@ export default async function request(token, patchObj, endpoint, type) {
 		if (response.status === 200) {
 			console.log('Status 200');
 			let json = await response.json();
-			console.log(json);
+			//console.log(json);
 			return json;
 		} else if (response.status === 400) {
 			console.log(response.status);
 			return false;
+		} else if (response.status === 403) {
+			console.log(response.status);
+			return 403;
 		} else {
 			console.log(response);
 			return false;

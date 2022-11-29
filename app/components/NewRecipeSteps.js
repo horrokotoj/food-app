@@ -12,7 +12,6 @@ const NewPortions = ({ recipeSteps, setRecipeSteps }) => {
 	const [newStepDesc, setNewStepDesc] = useState('');
 
 	const patch = (fakeStepId, editStep, editStepDesc) => {
-		console.log('After patch');
 		let tmpSteps;
 		if (editStep && editStepDesc) {
 			tmpSteps = recipeSteps.map((step) =>
@@ -50,8 +49,6 @@ const NewPortions = ({ recipeSteps, setRecipeSteps }) => {
 			{
 				text: 'Yes',
 				onPress: () => {
-					console.log('In confermDelete');
-					console.log(fakeStepId);
 					if (fakeStepId != null) {
 						let tmpSteps = [];
 						for (let i = 0; i < recipeSteps.length; i++) {
@@ -83,8 +80,6 @@ const NewPortions = ({ recipeSteps, setRecipeSteps }) => {
 	};
 
 	const add = (newStep, newStepDesc) => {
-		console.log('In add');
-
 		if (newStep && newStepDesc) {
 			let fakeStepId = 0;
 			for (let i = 0; i < recipeSteps.length; i++) {
@@ -116,8 +111,6 @@ const NewPortions = ({ recipeSteps, setRecipeSteps }) => {
 			alert('Failed to add');
 		}
 	};
-
-	console.log(recipeSteps);
 
 	return (
 		<>
