@@ -75,12 +75,12 @@ export default function Navigator() {
 
 			try {
 				refreshToken = await SecureStore.getItemAsync('refreshToken');
-				username = await SecureStore.getItemAsync('username');
+				usernameStringified = await SecureStore.getItemAsync('username');
 				console.log(refreshToken);
-				console.log(username);
+				console.log(usernameStringified);
 				console.log('Result in bootstrap');
-				if (refreshToken && username) {
-					setUsername(username);
+				if (refreshToken && usernameStringified) {
+					setUsername(JSON.parse(usernameStringified));
 					let response = await RefreshToken(refreshToken);
 					if (response.token) {
 						setAccessToken(response.token);
@@ -116,10 +116,14 @@ export default function Navigator() {
 						console.log(response);
 						let newRefreshToken = response.refreshToken;
 						let newAccessToken = response.accessToken;
+						console.log(response.user.email);
 						await SecureStore.setItemAsync('refreshToken', newRefreshToken);
-						await SecureStore.setItemAsync('username', loginUsername);
+						await SecureStore.setItemAsync(
+							'username',
+							JSON.stringify(response.user)
+						);
 						setAccessToken(newAccessToken);
-						setUsername(loginUsername);
+						setUsername(response.user);
 						dispatch({ type: 'SIGN_IN' });
 					}
 					//await login request

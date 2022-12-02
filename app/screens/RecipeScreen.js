@@ -165,7 +165,8 @@ const RecipeScreen = ({ route, navigation }) => {
 		getRecipeIngredientsOnRender();
 		getRecipeStepsOnRender();
 	}, [Recipe]);
-
+	console.log(username.houseHoldId);
+	console.log(recipe);
 	if (recipe) {
 		return (
 			<Provider>
@@ -182,7 +183,7 @@ const RecipeScreen = ({ route, navigation }) => {
 							if (isEditing) setEditName(!editName);
 						}}
 					/>
-					{username === recipe.RecipeOwner && isEditing && (
+					{username.houseHoldId === recipe.HouseHoldId && isEditing && (
 						<Appbar.Action
 							icon={editImage ? 'close-outline' : 'image-edit-outline'}
 							color='white'
@@ -191,7 +192,7 @@ const RecipeScreen = ({ route, navigation }) => {
 							}}
 						/>
 					)}
-					{username === recipe.RecipeOwner && (
+					{username.houseHoldId === recipe.HouseHoldId && (
 						<Appbar.Action
 							icon={isEditing ? 'check-outline' : MORE_ICON}
 							color='white'
@@ -295,6 +296,13 @@ const RecipeScreen = ({ route, navigation }) => {
 										}}
 									/>
 								)}
+								{recipe.RecipeOwner && (
+									<>
+										<Title>Recipe owner: </Title>
+										<Paragraph>{recipe.RecipeOwner}</Paragraph>
+									</>
+								)}
+								{recipe.Public === 1 && <Title>Public</Title>}
 							</Card.Content>
 						</Card>
 					</KeyboardAvoidingView>

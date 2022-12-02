@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useRef } from 'react';
-import { View, Alert } from 'react-native';
+import { View, Alert, ScrollView, Keyboard } from 'react-native';
 import {
 	Title,
 	List,
@@ -9,6 +9,7 @@ import {
 	Chip,
 	Portal,
 	Modal,
+	Paragraph,
 } from 'react-native-paper';
 import { styleSheet } from '../styleSheets/StyleSheet';
 
@@ -29,6 +30,10 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 	const [measurement, setMeasurement] = useState(null);
 	const [addingNew, setAddingNew] = useState(false);
 	const [allMeasurements, setAllMeasurements] = useState(null);
+	const [storeSections, setStoreSections] = useState(null);
+	const [storeSectionId, setStoreSectionId] = useState(null);
+	const [storeSectionName, setStoreSectionName] = useState(null);
+	const [addStoreSection, setAddStoreSection] = useState(false);
 
 	const accessToken = useContext(AccessTokenContext);
 	const { request } = useContext(NetworkContext);
@@ -124,11 +129,12 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 		}
 	};
 
-	const addNew = async (ingToAdd, quantToAdd, measurement) => {
+	const addNew = async (ingToAdd, quantToAdd, measurement, storeSectionId) => {
 		if (ingToAdd && quantToAdd && measurement.MeasurementId) {
 			let bodyObj = {
 				IngredientName: ingToAdd,
 				MeasurementId: measurement.MeasurementId,
+				StoreSectionId: storeSectionId,
 			};
 			let response = await request(accessToken, bodyObj, 'ingredient', 'post');
 			if (response.insertId) {
@@ -145,6 +151,18 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 			response = await request(accessToken, null, 'measurements', 'GET');
 			if (response.length > 0) {
 				setAllMeasurements(response);
+			}
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const handleGetStoreSections = async () => {
+		let response;
+		try {
+			response = await request(accessToken, null, 'storesections', 'GET');
+			if (response.length > 0) {
+				setStoreSections(response);
 			}
 		} catch (err) {
 			console.log(err);
@@ -170,6 +188,9 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 		setAddingNew(true);
 		if (!allMeasurements) {
 			await handleGetMeasurements();
+		}
+		if (!storeSections) {
+			await handleGetStoreSections();
 		}
 	};
 
@@ -223,6 +244,7 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 				return item_data.indexOf(text_data) > -1;
 			});
 			setMatch(match);
+			console.log(measurement);
 			setMeasurement(measurement);
 			setSearchData(updatedData);
 		}
@@ -334,6 +356,9 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 							visible={addIngredient}
 							onDismiss={() => {
 								setAddIngredient(false);
+								setAddStoreSection(false);
+								setMeasurement(null);
+								setQuantToAdd(null);
 							}}
 							style={{ marginBottom: '40%' }}
 							contentContainerStyle={{
@@ -343,22 +368,57 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 								marginRight: '10%',
 							}}
 						>
-							<View style={styleSheet.ingredientsContainer}>
-								{searchData &&
-									searchData.map((ing) => {
-										return (
-											<Chip
-												key={ing.IngredientId}
-												style={styleSheet.ingredientChip}
-												onPress={() => {
-													setIngToAdd(ing.IngredientName);
-												}}
-											>
-												{ing.IngredientName}
-											</Chip>
-										);
-									})}
-							</View>
+							<ScrollView>
+								<View style={styleSheet.ingredientsContainer}>
+									{searchData &&
+										!addingNew &&
+										searchData.map((ing) => {
+											return (
+												<Chip
+													key={ing.IngredientId}
+													style={styleSheet.ingredientChip}
+													onPress={() => {
+														setIngToAdd(ing.IngredientName);
+													}}
+												>
+													{ing.IngredientName}
+												</Chip>
+											);
+										})}
+									{addingNew &&
+										!measurement &&
+										allMeasurements &&
+										allMeasurements.map((measurement) => {
+											return (
+												<Chip
+													key={measurement.MeasurementId}
+													style={styleSheet.ingredientChip}
+													onPress={() => {
+														setMeasurement(measurement);
+													}}
+												>
+													{measurement.MeasurementName}
+												</Chip>
+											);
+										})}
+									{addStoreSection &&
+										!storeSectionId &&
+										storeSections.map((storeSection) => {
+											return (
+												<Chip
+													key={storeSection.StoreSectionId}
+													style={styleSheet.ingredientChip}
+													onPress={() => {
+														setStoreSectionId(storeSection.StoreSectionId);
+														setStoreSectionName(storeSection.StoreSectionName);
+													}}
+												>
+													{storeSection.StoreSectionName}
+												</Chip>
+											);
+										})}
+								</View>
+							</ScrollView>
 							<View style={styleSheet.recipeInputContainer}>
 								<TextInput
 									style={styleSheet.recipeAdd}
@@ -367,9 +427,6 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 									label='Ingredient'
 									multiline={true}
 									onChangeText={setIngToAdd}
-									onSubmitEditing={() => {
-										amountRef.current.focus();
-									}}
 								/>
 
 								{!match && !addingNew && (
@@ -378,6 +435,7 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 										size={20}
 										onPress={() => {
 											handleNewIngredient();
+											Keyboard.dismiss();
 										}}
 									/>
 								)}
@@ -388,39 +446,15 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 										onPress={() => {
 											setAddingNew(false);
 											setMeasurement(null);
+											setQuantToAdd(null);
+											setAddStoreSection(false);
+											setStoreSectionId(null);
+											setStoreSectionName(null);
 										}}
 									/>
 								)}
-
-								{/*<IconButton
-									icon='pencil-off'
-									size={20}
-									onPress={() => {
-										setIngToAdd('');
-										setQuantToAdd('');
-										setAddIngredient(false);
-									}}
-								/>*/}
 							</View>
 							<View style={styleSheet.recipeInputContainer}>
-								{addingNew && !measurement && (
-									<View style={styleSheet.ingredientsContainer}>
-										{allMeasurements &&
-											allMeasurements.map((measurement) => {
-												return (
-													<Chip
-														key={measurement.MeasurementId}
-														style={styleSheet.ingredientChip}
-														onPress={() => {
-															setMeasurement(measurement);
-														}}
-													>
-														{measurement.MeasurementName}
-													</Chip>
-												);
-											})}
-									</View>
-								)}
 								{measurement && (
 									<TextInput
 										style={styleSheet.recipeQuant}
@@ -431,29 +465,45 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 										ref={amountRef}
 										onChangeText={setQuantToAdd}
 										onSubmitEditing={() => {
-											add(ingToAdd, quantToAdd, measurement);
+											if (match) {
+												add(ingToAdd, quantToAdd, measurement);
+											} else {
+												addNew(ingToAdd, quantToAdd, measurement);
+											}
 										}}
 									/>
 								)}
-								{match && measurement && (
-									<IconButton
-										icon='check-outline'
-										size={20}
-										onPress={() => {
-											add(ingToAdd, quantToAdd, measurement);
-										}}
-									/>
-								)}
+
 								{!match && measurement && (
 									<IconButton
-										icon='check'
+										icon='arrow-down-right'
 										size={20}
 										onPress={() => {
-											addNew(ingToAdd, quantToAdd, measurement);
+											//addNew(ingToAdd, quantToAdd, measurement);
+											setAddStoreSection(!addStoreSection);
+											Keyboard.dismiss();
 										}}
 									/>
 								)}
 							</View>
+							{addStoreSection && <Title>Store section:</Title>}
+							{addStoreSection && storeSectionName && (
+								<Paragraph>{storeSectionName}</Paragraph>
+							)}
+							{((match && measurement) || storeSectionName) && (
+								<IconButton
+									icon='check-outline'
+									style={{ alignSelf: 'center' }}
+									size={20}
+									onPress={() => {
+										if (match) {
+											add(ingToAdd, quantToAdd, measurement);
+										} else {
+											addNew(ingToAdd, quantToAdd, measurement, storeSectionId);
+										}
+									}}
+								/>
+							)}
 						</Modal>
 					</Portal>
 				)}

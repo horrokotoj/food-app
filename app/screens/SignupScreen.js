@@ -84,6 +84,7 @@ const SignupScreen = ({ navigation }) => {
 							mode='outlined'
 							secureTextEntry
 							label='Password'
+							returnKeyType='next'
 							value={password}
 							right={
 								<TextInput.Icon
