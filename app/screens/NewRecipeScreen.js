@@ -115,7 +115,7 @@ const NewRecipeScreen = ({ route, navigation }) => {
 
 	return (
 		<Provider>
-			<Appbar.Header>
+			<Appbar.Header style={styleSheet.appbarHeader}>
 				<Appbar.BackAction
 					onPress={() => {
 						navigation.navigate('Recipes');

@@ -18,6 +18,12 @@ export const styleSheet = StyleSheet.create({
 	logoText: {
 		fontSize: 50,
 	},
+	calendarButtonsContainer: {
+		flexDirection: 'row',
+		justifyContent: 'space-evenly',
+		marginTop: 20,
+		marginBottom: 5,
+	},
 	inputContainer: {
 		flex: 2,
 		width: '100%',
@@ -28,9 +34,31 @@ export const styleSheet = StyleSheet.create({
 		margin: 5,
 		width: 250,
 	},
+	calendarRecipeView: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	listContentView: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	listEditView: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		marginLeft: 10,
+	},
+	recipeTouchable: { width: '70%' },
+	listTouchable: {
+		width: '70%',
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	appbarHeader: { backgroundColor: 'dodgerblue' },
 	button: {
 		margin: 5,
 		justifyContent: 'center',
+		backgroundColor: 'dodgerblue',
 	},
 	buttonLabelStyle: {
 		fontSize: 15,
@@ -98,6 +126,33 @@ export const styleSheet = StyleSheet.create({
 	closeButtonContentStyle: {
 		alignText: 'center',
 	},
+	editPortionsButton: {
+		backgroundColor: 'dodgerblue',
+		width: '40%',
+		borderRadius: 25,
+	},
+	editPortionsButtonLabelStyle: {
+		fontSize: 15,
+		padding: 5,
+		color: 'black',
+	},
+	addMealButton: {
+		backgroundColor: 'dodgerblue',
+		width: '40%',
+		borderRadius: 25,
+	},
+	addMealButtonLabelStyle: {
+		fontSize: 15,
+		padding: 10,
+		color: 'black',
+	},
+	addRecipeButton: {
+		flexDirection: 'row-reverse',
+	},
+	addRecipeButtonLabelStyle: {
+		fontSize: 50,
+		color: 'dodgerblue',
+	},
 	addButton: {
 		justifyContent: 'center',
 		marginTop: 5,
@@ -105,14 +160,9 @@ export const styleSheet = StyleSheet.create({
 	deleteButton: {
 		marginTop: 5,
 	},
-	addRecipeButton: {
-		flexDirection: 'row-reverse',
-	},
-	addRecipeButtonLabelStyle: {
-		fontSize: 50,
-	},
 	addButtonLabelStyle: {
 		fontSize: 35,
+		color: 'dodgerblue',
 	},
 	deleteButtonLabelStyle: {
 		fontSize: 35,
@@ -123,5 +173,16 @@ export const styleSheet = StyleSheet.create({
 		borderRadius: 10,
 		margin: 3,
 		backgroundColor: 'rgb(255, 219, 209)',
+	},
+	modalStyle: { marginBottom: '40%' },
+	modalContainerStyle: {
+		backgroundColor: 'white',
+		padding: 20,
+		marginLeft: '10%',
+		marginRight: '10%',
+	},
+	calendarPortionsInput: {
+		width: '50%',
+		alignSelf: 'center',
 	},
 });

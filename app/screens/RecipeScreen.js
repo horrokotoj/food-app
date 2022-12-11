@@ -8,16 +8,12 @@ import {
 } from 'react-native';
 import {
 	Appbar,
-	Menu,
 	Provider,
 	Card,
 	Title,
 	Paragraph,
 	TextInput,
 	Button,
-	Portal,
-	Modal,
-	Text,
 	IconButton,
 } from 'react-native-paper';
 import { styleSheet } from '../styleSheets/StyleSheet';
@@ -44,7 +40,7 @@ const RecipeScreen = ({ route, navigation }) => {
 
 	const [addIngredient, setAddIngredient] = useState(false);
 
-	const { Recipe } = route.params;
+	const { Recipe, Return } = route.params;
 
 	const accessToken = useContext(AccessTokenContext);
 	const username = useContext(UsernameContext);
@@ -102,7 +98,7 @@ const RecipeScreen = ({ route, navigation }) => {
 					};
 
 					if (await request(accessToken, bodyObj, 'recipe', 'DELETE')) {
-						navigation.navigate('Recipes');
+						navigation.navigate(Return);
 					}
 				},
 			},
@@ -165,16 +161,16 @@ const RecipeScreen = ({ route, navigation }) => {
 		getRecipeIngredientsOnRender();
 		getRecipeStepsOnRender();
 	}, [Recipe]);
-	console.log(username.houseHoldId);
-	console.log(recipe);
+	console.log(Recipe);
+	console.log(Return);
 	if (recipe) {
 		return (
 			<Provider>
-				<Appbar.Header style={{}}>
+				<Appbar.Header style={styleSheet.appbarHeader}>
 					<Appbar.BackAction
 						onPress={() => {
 							setIsEditing(false);
-							navigation.navigate('Recipes');
+							navigation.navigate(Return);
 						}}
 					/>
 					<Appbar.Content

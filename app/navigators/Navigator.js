@@ -7,6 +7,8 @@ import { AuthContext } from '../context/AuthContext';
 import { UsernameContext } from '../context/UsernameContext';
 import { AccessTokenContext } from '../context/AccessTokenContext';
 import { NetworkContext } from '../context/NetworkContext';
+import { InitialDateContext } from '../context/InitialDateContext';
+import { SetInitialDateContext } from '../context/SetInitialDateContext';
 
 import AuthNavigator from './AuthNavigator';
 import DrawerNavigator from './DrawerNavigator';
@@ -20,10 +22,13 @@ import RefreshToken from '../network/RefreshToken';
 
 import Request from '../network/Request';
 
+import moment from 'moment';
+
 export default function Navigator() {
 	const [loading, setLoading] = useState(false);
 	const [accessToken, setAccessToken] = useState('');
 	const [username, setUsername] = useState('');
+	const [initialDate, setInitialDate] = useState(moment().format('YYYY-MM-DD'));
 
 	/**
 	 * Inspired by https://reactnavigation.org/docs/auth-flow/
@@ -266,7 +271,11 @@ export default function Navigator() {
 			<UsernameContext.Provider value={username}>
 				<AccessTokenContext.Provider value={accessToken}>
 					<NetworkContext.Provider value={networkContext}>
-						<NavigationContainer>{chooseNav()}</NavigationContainer>
+						<InitialDateContext.Provider value={initialDate}>
+							<SetInitialDateContext.Provider value={setInitialDate}>
+								<NavigationContainer>{chooseNav()}</NavigationContainer>
+							</SetInitialDateContext.Provider>
+						</InitialDateContext.Provider>
 					</NetworkContext.Provider>
 				</AccessTokenContext.Provider>
 			</UsernameContext.Provider>

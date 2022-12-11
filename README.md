@@ -14,7 +14,7 @@ Requires npm version 8.5.5
 
 `expo install expo-secure-store react-native-gesture-handler react-native-reanimated`
 
-`npm i --save react-native-paper react-native-vector-icons @react-navigation/native @react-navigation/stack @react-navigation/drawer`
+`npm i --save react-native-paper react-native-vector-icons @react-navigation/native @react-navigation/stack @react-navigation/drawer react-native-calendars`
 
 .env file
 

@@ -19,6 +19,7 @@ export default async function request(token, patchObj, endpoint, type) {
 
 	console.log('Entered Request');
 	console.log(endpoint + ' ' + type);
+	console.log(patchObj);
 	try {
 		let response = await fetch(url, data);
 
@@ -33,6 +34,9 @@ export default async function request(token, patchObj, endpoint, type) {
 		} else if (response.status === 403) {
 			console.log(response.status);
 			return 403;
+		} else if (response.status === 500) {
+			console.log(response.status);
+			return false;
 		} else {
 			console.log(response);
 			return false;

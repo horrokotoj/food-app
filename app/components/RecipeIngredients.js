@@ -360,13 +360,8 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 								setMeasurement(null);
 								setQuantToAdd(null);
 							}}
-							style={{ marginBottom: '40%' }}
-							contentContainerStyle={{
-								backgroundColor: 'white',
-								padding: 20,
-								marginLeft: '10%',
-								marginRight: '10%',
-							}}
+							style={styleSheet.modalStyle}
+							contentContainerStyle={styleSheet.modalContainerStyle}
 						>
 							<ScrollView>
 								<View style={styleSheet.ingredientsContainer}>
