@@ -1,7 +1,7 @@
 import { DOMAIN_AUTH, PORT_AUTH } from '@env';
 
 export default async function SignoutRequest(token) {
-	let endpoint = 'http://' + DOMAIN_AUTH + ':' + PORT_AUTH + '/logout/';
+	let endpoint = DOMAIN_AUTH + '/logout/';
 	console.log('Entered SignoutRequest');
 	try {
 		let response = await fetch(endpoint, {

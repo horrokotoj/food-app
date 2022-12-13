@@ -1,7 +1,7 @@
 import { DOMAIN_AUTH, PORT_AUTH } from '@env';
 
 export default async function RefreshToken(refreshToken) {
-	let endpoint = 'http://' + DOMAIN_AUTH + ':' + PORT_AUTH + '/token/';
+	let endpoint = DOMAIN_AUTH + '/token/';
 
 	console.log('Entered RefreshToken');
 	console.log(refreshToken);

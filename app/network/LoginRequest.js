@@ -1,7 +1,7 @@
 import { DOMAIN_AUTH, PORT_AUTH } from '@env';
 
 export default async function LoginRequest(username, password) {
-	let endpoint = 'http://' + DOMAIN_AUTH + ':' + PORT_AUTH + '/login/';
+	let endpoint = DOMAIN_AUTH + '/login/';
 	console.log('Entered LoginRequest');
 	console.log(endpoint);
 	let body = JSON.stringify({

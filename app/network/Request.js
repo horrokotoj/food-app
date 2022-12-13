@@ -1,8 +1,7 @@
 import { DOMAIN_SERVER, PORT_SERVER } from '@env';
 
 export default async function request(token, patchObj, endpoint, type) {
-	let url =
-		'http://' + DOMAIN_SERVER + ':' + PORT_SERVER + '/' + endpoint + '/';
+	let url = DOMAIN_SERVER + '/' + endpoint + '/';
 
 	let data = {
 		method: type,
