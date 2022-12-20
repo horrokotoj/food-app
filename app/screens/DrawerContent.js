@@ -44,6 +44,13 @@ export default function DrawerContent(props) {
 								<Ionicons name='list-outline' color={color} size={size} />
 							)}
 						/>
+						<DrawerItem
+							label={'House hold'}
+							onPress={() => props.navigation.navigate('House hold')}
+							icon={({ color, size }) => (
+								<Ionicons name='home' color={color} size={size} />
+							)}
+						/>
 					</Drawer.Section>
 				</View>
 			</DrawerContentScrollView>

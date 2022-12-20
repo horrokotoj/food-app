@@ -30,6 +30,10 @@ export default async function request(token, patchObj, endpoint, type) {
 		} else if (response.status === 400) {
 			console.log(response.status);
 			return false;
+		} else if (response.status === 401) {
+			console.log(response.status);
+			alert('Unautharized');
+			return false;
 		} else if (response.status === 403) {
 			console.log(response.status);
 			return 403;
@@ -37,7 +41,7 @@ export default async function request(token, patchObj, endpoint, type) {
 			console.log(response.status);
 			return false;
 		} else {
-			console.log(response);
+			console.log(response.status);
 			return false;
 		}
 	} catch (err) {

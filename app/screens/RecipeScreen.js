@@ -15,6 +15,7 @@ import {
 	TextInput,
 	Button,
 	IconButton,
+	Switch,
 } from 'react-native-paper';
 import { styleSheet } from '../styleSheets/StyleSheet';
 
@@ -26,6 +27,7 @@ import RecipeDesc from '../components/RecipeDesc';
 import RecipeIngredients from '../components/RecipeIngredients';
 import RecipeSteps from '../components/RecipeSteps';
 import Portions from '../components/Portions';
+import { set } from 'react-native-reanimated';
 
 const RecipeScreen = ({ route, navigation }) => {
 	const [recipe, setRecipe] = useState(null);
@@ -37,6 +39,7 @@ const RecipeScreen = ({ route, navigation }) => {
 	const [imageEdit, setImageEdit] = useState('');
 	const [editName, setEditName] = useState(false);
 	const [nameEdit, setNameEdit] = useState('');
+	const [publicSwitch, setPublicSwitch] = useState(false);
 
 	const [addIngredient, setAddIngredient] = useState(false);
 
@@ -149,6 +152,23 @@ const RecipeScreen = ({ route, navigation }) => {
 		}
 	};
 
+	const onTogglePublicSwitch = async (recipeId) => {
+		let newPublic = !publicSwitch;
+		let bodyObj = {
+			RecipeId: recipeId,
+			Public: newPublic,
+		};
+
+		if (await request(accessToken, bodyObj, 'recipe', 'PATCH')) {
+			setPublicSwitch(newPublic);
+			let tmpRecipe = recipe;
+			tmpRecipe = { ...tmpRecipe, Public: newPublic };
+			setRecipe(tmpRecipe);
+		} else {
+			alert('Failed to toggle public');
+		}
+	};
+
 	useEffect(() => {
 		const getRecipeIngredientsOnRender = async () => {
 			await handleGetRecipeIngredients();
@@ -170,6 +190,7 @@ const RecipeScreen = ({ route, navigation }) => {
 					<Appbar.BackAction
 						onPress={() => {
 							setIsEditing(false);
+							setEditName(false);
 							navigation.navigate(Return);
 						}}
 					/>
@@ -193,7 +214,9 @@ const RecipeScreen = ({ route, navigation }) => {
 							icon={isEditing ? 'check-outline' : MORE_ICON}
 							color='white'
 							onPress={() => {
+								setPublicSwitch(recipe.Public ? true : false);
 								setIsEditing(!isEditing);
+								setEditName(false);
 							}}
 						/>
 					)}
@@ -298,7 +321,23 @@ const RecipeScreen = ({ route, navigation }) => {
 										<Paragraph>{recipe.RecipeOwner}</Paragraph>
 									</>
 								)}
-								{recipe.Public === 1 && <Title>Public</Title>}
+								{!isEditing && (
+									<>
+										<Title>Public</Title>
+										<Paragraph>{recipe.Public ? 'Yes' : 'No'}</Paragraph>
+									</>
+								)}
+								{isEditing && (
+									<>
+										<Title>Public</Title>
+										<Switch
+											value={publicSwitch}
+											onValueChange={() => {
+												onTogglePublicSwitch(recipe.RecipeId);
+											}}
+										/>
+									</>
+								)}
 							</Card.Content>
 						</Card>
 					</KeyboardAvoidingView>

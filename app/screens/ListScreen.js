@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useCallback } from 'react';
+import { useState, useContext, useEffect, useCallback, useRef } from 'react';
 import {
 	ScrollView,
 	RefreshControl,
@@ -6,6 +6,7 @@ import {
 	View,
 	Alert,
 	TouchableOpacity,
+	Keyboard,
 } from 'react-native';
 import {
 	Appbar,
@@ -19,38 +20,48 @@ import {
 	List,
 	Portal,
 	Modal,
+	Menu,
+	Divider,
+	Chip,
 } from 'react-native-paper';
 import { styleSheet } from '../styleSheets/StyleSheet';
-
-import { ShakeEventExpo } from '../components/ShakeEventExpo';
 
 import { NetworkContext } from '../context/NetworkContext';
 import { AccessTokenContext } from '../context/AccessTokenContext';
 import { UsernameContext } from '../context/UsernameContext';
 
-import RecipeDesc from '../components/RecipeDesc';
-import RecipeIngredients from '../components/RecipeIngredients';
-import RecipeSteps from '../components/RecipeSteps';
-import Portions from '../components/Portions';
-
 const ListScreen = ({ route, navigation }) => {
 	const [refreshing, setRefreshing] = useState(false);
 	const [listContent, setListContent] = useState(null);
 	const [undoQueue, setUndoQueue] = useState([]);
-	const [undoing, setUndoing] = useState(false);
 	const [editQuantity, setEditQuantity] = useState(null);
 	const [newQuantity, setNewQuantity] = useState(null);
 	const [edit, setEdit] = useState(null);
 	const [newQuantityAvailable, setNewQuantityAvailable] = useState(null);
 	const [editShoppingList, setEditShoppingList] = useState(false);
+	const [menuVisible, setMenuVisible] = useState(false);
+	const [addItem, setAddItem] = useState(false);
+	const [allIngredients, setAllIngredients] = useState(null);
+	const [ingredients, setIngredients] = useState(null);
+	const [ingToAdd, setIngToAdd] = useState('');
+	const [quantToAdd, setQuantToAdd] = useState(null);
+	const [measurements, setMeasurements] = useState(null);
+	const [measurement, setMeasurement] = useState(null);
+	const [addStoreSection, setAddStoreSection] = useState(null);
+	const [storeSections, setStoreSections] = useState(null);
+	const [storeSection, setStoreSection] = useState(null);
+	const [searchData, setSearchData] = useState(null);
+	const [match, setMatch] = useState(false);
+	const [addingNew, setAddingNew] = useState(false);
 
 	const { list, Return } = route.params;
 
 	const accessToken = useContext(AccessTokenContext);
-	const username = useContext(UsernameContext);
 	const { request } = useContext(NetworkContext);
 
 	const MORE_ICON = Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical';
+
+	const amountRef = useRef();
 
 	const handleGetListContent = async () => {
 		let response;
@@ -71,6 +82,110 @@ const ListScreen = ({ route, navigation }) => {
 			}
 		} catch (err) {
 			console.log(err);
+		}
+	};
+
+	const getIngredients = async () => {
+		let response;
+		try {
+			response = await request(accessToken, null, `ingredients`, 'GET');
+			if (response.length > 0) {
+				let sortedList = response.sort((a, b) => {
+					return a.IngredientName - b.IngredientName;
+				});
+				setAllIngredients(sortedList);
+			} else {
+				setAllIngredients(null);
+			}
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const getMeasurements = async () => {
+		let response;
+		try {
+			response = await request(accessToken, null, `measurements`, 'GET');
+			if (response.length > 0) {
+				let sortedList = response.sort((a, b) => {
+					return a.MeasurementName - b.MeasurementName;
+				});
+				setMeasurements(sortedList);
+			} else {
+				setListContent(null);
+			}
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const getStoreSections = async () => {
+		let response;
+		try {
+			response = await request(accessToken, null, `storesections`, 'GET');
+			if (response.length > 0) {
+				let sortedList = response.sort((a, b) => {
+					return a.StoreSectionName - b.StoreSectionName;
+				});
+				setStoreSections(sortedList);
+			} else {
+				setListContent(null);
+			}
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const add = async (ingToAdd, quantToAdd, measurement, ingredientId) => {
+		if (ingredients && ingToAdd && quantToAdd) {
+			if (!ingredientId) {
+				for (let i = 0; i < ingredients.length; i++) {
+					if (ingToAdd === ingredients[i].IngredientName) {
+						ingredientId = ingredients[i].IngredientId;
+						break;
+					}
+				}
+			}
+			if (ingredientId) {
+				let bodyObj = {
+					ShoppingListId: list.ShoppingListId,
+					IngredientId: ingredientId,
+					Quantity: quantToAdd,
+					MeasurementName: measurement.MeasurementName,
+					StoreId: list.StoreId,
+				};
+				console.log(bodyObj);
+				if (await request(accessToken, bodyObj, 'listcontent', 'POST')) {
+					handleGetListContent();
+					setAddItem(false);
+					setMeasurement(null);
+					setIngToAdd('');
+					setQuantToAdd('');
+				}
+			} else {
+				alert('Failed to add');
+			}
+		}
+	};
+
+	const addNew = async (
+		ingToAdd,
+		quantToAdd,
+		measurement,
+		localStoreSectionId
+	) => {
+		if (ingToAdd && quantToAdd && measurement.MeasurementId) {
+			let bodyObj = {
+				IngredientName: ingToAdd,
+				MeasurementId: measurement.MeasurementId,
+				StoreSectionId: localStoreSectionId,
+			};
+			let response = await request(accessToken, bodyObj, 'ingredient', 'post');
+			if (response.insertId) {
+				add(ingToAdd, quantToAdd, measurement, response.insertId);
+			} else {
+				console.log('failed to add new');
+			}
 		}
 	};
 
@@ -241,77 +356,56 @@ const ListScreen = ({ route, navigation }) => {
 		}
 	};
 
-	const handleUndo = async (undoQueue) => {
-		if (undoing && undoQueue.length > 0) {
-			let response;
+	const handleUndo = async () => {
+		if (undoQueue.length > 0) {
+			let newUndoQueue = undoQueue;
+			let undo = newUndoQueue.pop();
+			console.log(newUndoQueue);
+			let obj = {
+				IngredientId: undo.IngredientId,
+				ShoppingListId: undo.ShoppingListId,
+				Picked: undo.Picked,
+			};
+			let thisList = listContent;
+			console.log('sortedList');
+			console.log(thisList);
 			try {
-				response = await request(
-					accessToken,
-					null,
-					`listcontent/${list.ShoppingListId}`,
-					'GET'
-				);
-				if (response.length > 0) {
-					let sortedList = response.sort((a, b) => {
-						return a.Indexx - b.Indexx;
-					});
-					setListContent(sortedList);
-					return Alert.alert('Undo', '', [
-						// The "Yes" button
-						{
-							text: 'Yes',
-							onPress: async () => {
-								let newUndoQueue = undoQueue;
-								let undo = newUndoQueue.pop();
-								console.log(newUndoQueue);
-								let obj = {
-									IngredientId: undo.IngredientId,
-									ShoppingListId: undo.ShoppingListId,
-									Picked: undo.Picked,
-								};
-								console.log('sortedList');
-								console.log(sortedList);
+				if (await request(accessToken, obj, `listcontent`, 'PATCH')) {
+					setUndoQueue(newUndoQueue);
 
-								try {
-									if (await request(accessToken, obj, `listcontent`, 'PATCH')) {
-										setUndoQueue(newUndoQueue);
-
-										let thisListContent = [];
-										console.log(sortedList);
-										for (let i = 0; i < sortedList.length; i++) {
-											if (sortedList[i].IngredientId === undo.IngredientId) {
-												thisListContent = thisListContent.concat({
-													...sortedList[i],
-													Picked: undo.Picked,
-												});
-											} else {
-												thisListContent = thisListContent.concat(sortedList[i]);
-											}
-										}
-										setListContent(thisListContent);
-									}
-								} catch (err) {
-									console.log(err);
-								}
-								setUndoing(false);
-							},
-						},
-						// The "No" button
-						// Does nothing but dismiss the dialog when tapped
-						{
-							text: 'No',
-							onPress: () => {
-								setUndoing(false);
-							},
-						},
-					]);
-				} else {
-					setListContent(null);
+					let thisListContent = [];
+					for (let i = 0; i < thisList.length; i++) {
+						if (thisList[i].IngredientId === undo.IngredientId) {
+							thisListContent = thisListContent.concat({
+								...thisList[i],
+								Picked: undo.Picked,
+							});
+						} else {
+							thisListContent = thisListContent.concat(thisList[i]);
+						}
+					}
+					setListContent(thisListContent);
 				}
 			} catch (err) {
 				console.log(err);
 			}
 		}
+	};
+
+	const handleNewIngredient = async () => {
+		setAddingNew(true);
+		if (!measurements) {
+			await getMeasurements();
+		}
+		if (!storeSections) {
+			await getStoreSections();
+		}
+	};
+
+	const handleOpenModal = () => {
+		setMenuVisible(false);
+		setAddItem(true);
+		getIngredients();
 	};
 
 	const onRefresh = useCallback(async () => {
@@ -329,28 +423,50 @@ const ListScreen = ({ route, navigation }) => {
 	}, []);
 
 	useEffect(() => {
-		handleUndo(undoQueue);
-	}, [undoing]);
+		if (listContent && allIngredients) {
+			let unusedIngredients = [];
+			for (let i = 0; i < allIngredients.length; i++) {
+				for (let j = 0; j < listContent.length; j++) {
+					if (
+						listContent[j].IngredientName === allIngredients[i].IngredientName
+					) {
+						break;
+					} else if (j == listContent.length - 1) {
+						unusedIngredients = unusedIngredients.concat(allIngredients[i]);
+					}
+				}
+			}
+			setIngredients(unusedIngredients);
+		}
+	}, [allIngredients]);
 
 	useEffect(() => {
-		ShakeEventExpo.addListener(() => {
-			//add your code here
-			console.log('shake shake shake');
-			setUndoing(true);
-		});
-
-		return () => {
-			// Your code here...
-			console.log('Killing shaker');
-			ShakeEventExpo.removeListener();
-		};
-	}, []);
+		if (ingToAdd == '') {
+			setSearchData(null);
+		} else if (ingredients) {
+			let match = false;
+			let measurement = null;
+			const updatedData = ingredients.filter((ing) => {
+				if (ingToAdd.toUpperCase() === ing.IngredientName.toUpperCase()) {
+					match = true;
+					measurement = { MeasurementName: ing.Measurement };
+				}
+				const item_data = `${ing.IngredientName.toUpperCase().slice(0, -1)}`;
+				const text_data = ingToAdd.toUpperCase();
+				return item_data.indexOf(text_data) > -1;
+			});
+			setMatch(match);
+			console.log(measurement);
+			setMeasurement(measurement);
+			setSearchData(updatedData);
+		}
+	}, [ingToAdd]);
 
 	console.log('undoQueue');
 	console.log(undoQueue);
 	console.log('listContent');
 
-	if (listContent) console.log(listContent.length);
+	console.log(list);
 
 	return (
 		<Provider>
@@ -361,14 +477,202 @@ const ListScreen = ({ route, navigation }) => {
 					}}
 				/>
 				<Appbar.Content title={list.ShoppingListName} />
-				{/* <Appbar.Action
-					icon={editShoppingList ? 'check-outline' : MORE_ICON}
-					color='white'
-					onPress={() => {
-						setEditShoppingList(!editShoppingList);
+				<Menu
+					visible={menuVisible}
+					onDismiss={() => {
+						setMenuVisible(false);
 					}}
-				/> */}
+					anchor={
+						<Appbar.Action
+							icon={menuVisible ? 'check-outline' : MORE_ICON}
+							color='white'
+							onPress={() => {
+								setMenuVisible(!menuVisible);
+							}}
+						/>
+					}
+					statusBarHeight={200}
+				>
+					{undoQueue.length > 0 ? (
+						<Menu.Item
+							icon='undo'
+							onPress={() => {
+								handleUndo(undoQueue);
+							}}
+							title='Undo'
+						/>
+					) : (
+						<Menu.Item icon='undo' title='Undo' disabled />
+					)}
+					<Menu.Item
+						icon='plus-circle-outline'
+						onPress={() => {
+							handleOpenModal();
+						}}
+						title='add item'
+					/>
+					<Divider />
+					<Menu.Item icon='share' onPress={() => {}} title='Share' />
+				</Menu>
 			</Appbar.Header>
+			<Portal>
+				<Modal
+					visible={addItem}
+					onDismiss={() => {
+						setAddItem(false);
+						// setAddStoreSection(false);
+						// setMeasurement(null);
+						// setQuantToAdd(null);
+					}}
+					style={styleSheet.modalStyle}
+					contentContainerStyle={styleSheet.modalContainerStyle}
+				>
+					<ScrollView>
+						<View style={styleSheet.ingredientsContainer}>
+							{searchData &&
+								!addingNew &&
+								searchData.map((ing) => {
+									return (
+										<Chip
+											key={ing.IngredientId}
+											style={styleSheet.ingredientChip}
+											onPress={() => {
+												setIngToAdd(ing.IngredientName);
+											}}
+										>
+											{ing.IngredientName}
+										</Chip>
+									);
+								})}
+							{addingNew &&
+								!measurement &&
+								measurements &&
+								measurements.map((measurement) => {
+									return (
+										<Chip
+											key={measurement.MeasurementId}
+											style={styleSheet.ingredientChip}
+											onPress={() => {
+												setMeasurement(measurement);
+											}}
+										>
+											{measurement.MeasurementName}
+										</Chip>
+									);
+								})}
+							{addStoreSection &&
+								!storeSection &&
+								storeSections &&
+								storeSections.map((storeSection) => {
+									return (
+										<Chip
+											key={storeSection.StoreSectionId}
+											style={styleSheet.ingredientChip}
+											onPress={() => {
+												setStoreSection({
+													StoreSectionId: storeSection.StoreSectionId,
+													StoreSectionName: storeSection.StoreSectionName,
+												});
+											}}
+										>
+											{storeSection.StoreSectionName}
+										</Chip>
+									);
+								})}
+						</View>
+					</ScrollView>
+					<View style={styleSheet.recipeInputContainer}>
+						<TextInput
+							style={styleSheet.recipeAdd}
+							value={ingToAdd}
+							mode='outlined'
+							label='Ingredient'
+							multiline={true}
+							onChangeText={setIngToAdd}
+						/>
+
+						{!match && !addingNew && (
+							<IconButton
+								icon='plus-circle-outline'
+								size={20}
+								onPress={() => {
+									handleNewIngredient();
+									Keyboard.dismiss();
+								}}
+							/>
+						)}
+						{!match && addingNew && (
+							<IconButton
+								icon='close-circle-outline'
+								size={20}
+								onPress={() => {
+									setAddingNew(false);
+									setMeasurement(null);
+									setQuantToAdd(null);
+									setAddStoreSection(false);
+									setStoreSection(null);
+								}}
+							/>
+						)}
+					</View>
+					<View style={styleSheet.recipeInputContainer}>
+						{measurement && (
+							<TextInput
+								style={styleSheet.recipeQuant}
+								value={quantToAdd}
+								mode='outlined'
+								keyboardType='numeric'
+								label={measurement.MeasurementName}
+								ref={amountRef}
+								onChangeText={setQuantToAdd}
+								onSubmitEditing={() => {
+									if (match) {
+										add(ingToAdd, quantToAdd, measurement);
+									} else {
+										addNew(ingToAdd, quantToAdd, measurement);
+									}
+								}}
+							/>
+						)}
+
+						{!match && measurement && (
+							<IconButton
+								icon='arrow-down-right'
+								size={20}
+								onPress={() => {
+									//addNew(ingToAdd, quantToAdd, measurement);
+									setAddStoreSection(!addStoreSection);
+									Keyboard.dismiss();
+								}}
+							/>
+						)}
+					</View>
+					{addStoreSection && <Title>Store section:</Title>}
+					{addStoreSection && storeSection && storeSection.StoreSectionName && (
+						<Paragraph>{storeSection.StoreSectionName}</Paragraph>
+					)}
+					{((match && measurement) ||
+						(storeSection && storeSection.StoreSectionName)) && (
+						<IconButton
+							icon='check-outline'
+							style={{ alignSelf: 'center' }}
+							size={20}
+							onPress={() => {
+								if (match) {
+									add(ingToAdd, quantToAdd, measurement);
+								} else {
+									addNew(
+										ingToAdd,
+										quantToAdd,
+										measurement,
+										storeSection.StoreSectionId
+									);
+								}
+							}}
+						/>
+					)}
+				</Modal>
+			</Portal>
 			<View style={styleSheet.container}>
 				<ScrollView
 					keyboardShouldPersistTaps={'handled'}

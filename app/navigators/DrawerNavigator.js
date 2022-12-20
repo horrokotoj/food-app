@@ -5,6 +5,7 @@ import ListsScreen from '../screens/ListsScreen';
 import AddMealScreen from '../screens/AddMealScreen';
 import RecipeScreen from '../screens/RecipeScreen';
 import ListScreen from '../screens/ListScreen';
+import HouseHoldScreen from '../screens/HouseHoldScreen';
 import NewRecipeScreen from '../screens/NewRecipeScreen';
 import DrawerContent from '../screens/DrawerContent';
 
@@ -31,6 +32,7 @@ export default function DrawerNavigator() {
 			<Drawer.Screen name={'AddMeal'} component={AddMealScreen} />
 			<Drawer.Screen name={'Recipe'} component={RecipeScreen} />
 			<Drawer.Screen name={'List'} component={ListScreen} />
+			<Drawer.Screen name={'House hold'} component={HouseHoldScreen} />
 			<Drawer.Screen name={'New recipe'} component={NewRecipeScreen} />
 		</Drawer.Navigator>
 	);
