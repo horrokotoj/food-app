@@ -185,6 +185,7 @@ const ListScreen = ({ route, navigation }) => {
 				add(ingToAdd, quantToAdd, measurement, response.insertId);
 			} else {
 				console.log('failed to add new');
+				alert('Failed to add new ingredient, check if it already exists.');
 			}
 		}
 	};

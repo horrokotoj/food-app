@@ -33,3 +33,7 @@ Requires npm version 8.5.5
 If problem with cache use:
 
 `expo r -c`
+
+# To publish
+
+`expo publish`

@@ -22,6 +22,17 @@ export default async function LoginRequest(username, password) {
 			console.log('Status 200');
 			let json = await response.json();
 			console.log(json);
+			alert(
+				'' +
+					json.user.user +
+					'\n' +
+					json.user.email +
+					'\n' +
+					json.refreshToken +
+					'\n' +
+					json.accessToken +
+					''
+			);
 			return json;
 		} else if (response.status === 401) {
 			console.log('Status 401');
