@@ -141,6 +141,7 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 			};
 			let response = await request(accessToken, bodyObj, 'ingredient', 'post');
 			if (response.insertId) {
+				setAddingNew(false);
 				add(ingToAdd, quantToAdd, measurement, response.insertId);
 			} else {
 				console.log('failed to add new');
