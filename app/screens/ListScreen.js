@@ -11,11 +11,9 @@ import {
 import {
 	Appbar,
 	Provider,
-	Card,
 	Title,
 	Paragraph,
 	TextInput,
-	Button,
 	IconButton,
 	List,
 	Portal,
@@ -23,6 +21,7 @@ import {
 	Menu,
 	Divider,
 	Chip,
+	Button,
 } from 'react-native-paper';
 import { styleSheet } from '../styleSheets/StyleSheet';
 
@@ -34,11 +33,9 @@ const ListScreen = ({ route, navigation }) => {
 	const [refreshing, setRefreshing] = useState(false);
 	const [listContent, setListContent] = useState(null);
 	const [undoQueue, setUndoQueue] = useState([]);
-	const [editQuantity, setEditQuantity] = useState(null);
 	const [newQuantity, setNewQuantity] = useState(null);
 	const [edit, setEdit] = useState(null);
 	const [newQuantityAvailable, setNewQuantityAvailable] = useState(null);
-	const [editShoppingList, setEditShoppingList] = useState(false);
 	const [menuVisible, setMenuVisible] = useState(false);
 	const [addItem, setAddItem] = useState(false);
 	const [allIngredients, setAllIngredients] = useState(null);
@@ -438,6 +435,8 @@ const ListScreen = ({ route, navigation }) => {
 				}
 			}
 			setIngredients(unusedIngredients);
+		} else {
+			setIngredients(allIngredients);
 		}
 	}, [allIngredients]);
 
@@ -505,13 +504,7 @@ const ListScreen = ({ route, navigation }) => {
 					) : (
 						<Menu.Item icon='undo' title='Undo' disabled />
 					)}
-					<Menu.Item
-						icon='plus-circle-outline'
-						onPress={() => {
-							handleOpenModal();
-						}}
-						title='add item'
-					/>
+
 					<Divider />
 					<Menu.Item icon='share' onPress={() => {}} title='Share' />
 				</Menu>
@@ -752,7 +745,6 @@ const ListScreen = ({ route, navigation }) => {
 										onPress={() =>
 											handleUnPick(content.IngredientId, content.ShoppingListId)
 										}
-										onLongPress={() => alert('long press')}
 										right={() => (
 											<Paragraph
 												style={{ width: '30%', alignSelf: 'center' }}
@@ -763,6 +755,14 @@ const ListScreen = ({ route, navigation }) => {
 							}
 						})}
 				</ScrollView>
+				<Button
+					icon='plus-circle-outline'
+					labelStyle={styleSheet.addRecipeButtonLabelStyle}
+					style={styleSheet.addRecipeButton}
+					onPress={() => {
+						handleOpenModal();
+					}}
+				/>
 			</View>
 			<Portal>
 				<Modal
