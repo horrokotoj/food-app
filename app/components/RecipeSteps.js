@@ -1,6 +1,13 @@
 import { useState, useEffect, useContext } from 'react';
 import { View, Alert } from 'react-native';
-import { Title, List, IconButton, TextInput, Button } from 'react-native-paper';
+import {
+	Title,
+	List,
+	IconButton,
+	TextInput,
+	Button,
+	Paragraph,
+} from 'react-native-paper';
 import { styleSheet } from '../styleSheets/StyleSheet';
 
 import { AccessTokenContext } from '../context/AccessTokenContext';
@@ -159,6 +166,7 @@ const Portions = ({ isEditing, recipeId, recipeSteps }) => {
 						<List.Item
 							key={step.StepId}
 							title={step.Step + '. ' + step.StepDesc}
+							titleNumberOfLines={10}
 						/>
 					);
 				})}
@@ -220,6 +228,7 @@ const Portions = ({ isEditing, recipeId, recipeSteps }) => {
 								<List.Item
 									key={step.StepId}
 									title={step.Step + '. ' + step.StepDesc}
+									titleNumberOfLines={10}
 									right={() => (
 										<IconButton
 											icon='pencil'
