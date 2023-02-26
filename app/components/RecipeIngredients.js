@@ -122,6 +122,9 @@ const RecipeIngredients = ({ recipeIngredients, isEditing, recipeId }) => {
 					setMeasurement(null);
 					setIngToAdd('');
 					setQuantToAdd('');
+					setAddStoreSection(false);
+					setStoreSectionId(null);
+					setStoreSectionName(null);
 				}
 			} else {
 				alert('Failed to add');

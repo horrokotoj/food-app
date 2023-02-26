@@ -57,6 +57,9 @@ const NewRecipeIngredients = ({ recipeIngredients, setRecipeIngredients }) => {
 				setMeasurement(null);
 				setIngToAdd('');
 				setQuantToAdd('');
+				setAddStoreSection(false);
+				setStoreSectionId(null);
+				setStoreSectionName(null);
 			} else {
 				alert('Failed to add');
 			}
