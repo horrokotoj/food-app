@@ -1,36 +1,37 @@
 import { useState, useContext, useCallback, useEffect } from 'react';
-import {
-	View,
-	ScrollView,
-	RefreshControl,
-	TouchableOpacity,
-} from 'react-native';
+import { View, ScrollView, RefreshControl, Text } from 'react-native';
 import { Title, Card, Button } from 'react-native-paper';
 import { NetworkContext } from '../context/NetworkContext';
 import { AccessTokenContext } from '../context/AccessTokenContext';
 import { styleSheet } from '../styleSheets/StyleSheet';
 
 const HouseHoldScreen = ({ navigation }) => {
-	const [lists, setLists] = useState(null);
+	const [inHouseHold, setInHouseHold] = useState(false);
+	const [houseHoldId, setHouseHoldId] = useState(null);
+	const [houseHoldName, setHouseHoldName] = useState(null);
 	const [refreshing, setRefreshing] = useState(false);
 	const accessToken = useContext(AccessTokenContext);
 	const { request } = useContext(NetworkContext);
 
-	const handleGetLists = async () => {
+	const handleGetHouseHoldId = async () => {
 		let response;
 		try {
-			response = await request(accessToken, null, 'shoppinglists', 'GET');
+			response = await request(accessToken, null, 'household', 'GET');
 			if (response) {
 				console.log(response);
-				let sortedLists = response.sort((a, b) => {
-					return a.ShoppingListId - b.ShoppingListId;
-				});
-				console.log('sorted');
-				console.log(sortedLists);
-
-				setLists(sortedLists);
+				if (response[0].HouseHoldId && response[0].HouseHoldName) {
+					setInHouseHold(true);
+					setHouseHoldId(response[0].HouseHoldId);
+					setHouseHoldName(response[0].HouseHoldName);
+				} else {
+					setInHouseHold(false);
+					setHouseHoldId(null);
+					setHouseHoldName(null);
+				}
 			} else {
-				setLists(null);
+				setInHouseHold(false);
+				setHouseHoldName(null);
+				setHouseHoldId(null);
 			}
 		} catch (err) {
 			console.log(err);
@@ -39,61 +40,35 @@ const HouseHoldScreen = ({ navigation }) => {
 
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
-		await handleGetLists();
+		await handleGetHouseHoldId();
 		setRefreshing(false);
 	}, []);
 
 	useEffect(() => {
-		const getListsOnRender = async () => {
-			await handleGetLists();
+		const getHouseHoldIdOnRender = async () => {
+			await handleGetHouseHoldId();
 		};
-		getListsOnRender();
+		getHouseHoldIdOnRender();
 	}, []);
 
 	return (
 		<>
 			<View style={styleSheet.container}>
-				{lists ? (
-					<ScrollView
-						refreshControl={
-							<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-						}
-					>
-						{lists ? (
-							lists.map((list) => {
-								let listId = list.ShoppingListId;
-								console.log(list);
-								return (
-									<View key={listId}>
-										<TouchableOpacity
-											onPress={() => {
-												navigation.navigate('List', {
-													list: list,
-													Return: 'Lists',
-												});
-											}}
-										>
-											<Card.Title title={list.ShoppingListName} />
-										</TouchableOpacity>
-									</View>
-								);
-							})
-						) : (
-							<></>
-						)}
-					</ScrollView>
-				) : (
-					<Button
-						mode='contained'
-						labelStyle={styleSheet.buttonLabelStyle}
-						style={styleSheet.button}
-						onPress={() => {
-							handleGetRecipes();
-						}}
-					>
-						Get lists
-					</Button>
-				)}
+				<ScrollView
+					refreshControl={
+						<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+					}
+				>
+					{inHouseHold && houseHoldName ? (
+						<>
+							<Text>Du tillhör household {houseHoldName}</Text>
+						</>
+					) : (
+						<>
+							<Text>Du tillhör inget household</Text>
+						</>
+					)}
+				</ScrollView>
 			</View>
 		</>
 	);
