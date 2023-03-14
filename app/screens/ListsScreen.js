@@ -38,6 +38,7 @@ const ListsSceen = ({ navigation }) => {
 			if (response.insertId) {
 				thisLists = lists.concat({
 					ShoppingListName: newListName,
+					ShoppingListId: response.insertId,
 				});
 				setLists(thisLists);
 				setEdit(null);
